@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     flex: 1, 
     alignItems: 'center', 
     justifyContent: 'center',
-    backgroundColor: "#fff2e2",
+    backgroundColor: "#E4EAF7",
     //paddingVertical: 50,
     position: "relative"
   },
@@ -65,7 +65,7 @@ description:{
     marginVertical:10,
     marginHorizontal: 10,
     borderRadius:10,
-    backgroundColor:'#F3EFCC',
+    backgroundColor:'#1E88E5',
 },
 descriptionText1:{
     fontSize:16,

@@ -196,7 +196,7 @@ const SignInScreen = () => {
       return;
     }
 
-    navigation.navigate('Main');
+    navigation.navigate('Bhuvan');
     //console.warn('Sign In');
   };
 
