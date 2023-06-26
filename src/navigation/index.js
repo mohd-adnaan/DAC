@@ -8,7 +8,8 @@ import SplashScreen from '../screens/SplashScreen';
 import SupportScreen from '../screens/SupportScreen';;
 import MainScreen from "../screens/MainScreen";
 import WebScreen from "../screens/WebScreen";
-import BhuvanScreen from "../screens/BhuvanScreen"; 
+import BhuvanScreen from "../screens/BhuvanScreen";
+import DrawerScreen from "../screens/DrawerScreen"; 
 const Stack = createNativeStackNavigator();
 const Navigation = () => {
   return (
@@ -21,6 +22,7 @@ const Navigation = () => {
         <Stack.Screen name="Bhuvan" component={BhuvanScreen} />
         <Stack.Screen name="Web" component ={WebScreen}/>
         <Stack.Screen name="Support" component={SupportScreen} />
+        <Stack.Screen name="Drawer" component={DrawerScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

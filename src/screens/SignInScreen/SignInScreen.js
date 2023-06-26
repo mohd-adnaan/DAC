@@ -1,4 +1,3 @@
-
 // import React, { useState } from 'react';
 // import {
 //   View,
@@ -11,6 +10,7 @@
 // } from 'react-native';
 
 // import Logo from '../../../assets/images/logoName.png';
+// import EmblemLogo from '../../../assets/images/emblem.png';
 // import CustomInput from '../../components/CustomInput';
 // import CustomButton from '../../components/CustomButton';
 // import { useNavigation } from '@react-navigation/native';
@@ -22,7 +22,8 @@
 //   const [loading, setLoading] = useState(false);
 
 //   const validateInput = (input) => {
-//     const alphanumericRegex = /^[a-zA-Z0-9]+$/;
+//     ///^[a-zA-Z0-9]+$/
+//     const alphanumericRegex = /^[0-9]{1,10}$/;
 //     return alphanumericRegex.test(input);
 //   };
 
@@ -32,8 +33,7 @@
 //       return;
 //     }
 
-//     navigation.navigate('Main');
-//     //console.warn('Sign In');
+//     navigation.navigate('Bhuvan');
 //   };
 
 //   const onSignUpPress = () => {
@@ -47,13 +47,17 @@
 //         showsVerticalScrollIndicator={false}
 //       >
 //         <View style={styles.content}>
+//         <Image
+//             source={EmblemLogo}
+//             style={styles.emblemLogo}
+//             resizeMode="contain"
+//           />
 //           <Image
 //             source={Logo}
 //             style={[styles.logo, { height: height * 0.3 }]}
 //             resizeMode="contain"
 //           />
 
-        
 //           <CustomInput
 //             name="phoneNumber"
 //             placeholder="Phone Number"
@@ -69,6 +73,7 @@
 //             style={styles.signInButton}
 //             textStyle={styles.signInButtonText}
 //           />
+
 //           <CustomButton
 //             text="Don't have an account? Register"
 //             onPress={onSignUpPress}
@@ -76,6 +81,8 @@
 //             style={styles.signUpButton}
 //             textStyle={styles.signUpButtonText}
 //           />
+
+
 //         </View>
 //       </ScrollView>
 
@@ -108,7 +115,7 @@
 //     width: '70%',
 //     maxWidth: 300,
 //     maxHeight: 200,
-//     marginBottom: 20,
+//     marginBottom: '20',
 //   },
 //   input: {
 //     marginBottom: 15,
@@ -142,6 +149,11 @@
 //     fontSize: 14,
 //     color: '#1E88E5',
 //   },
+//   emblemLogo: {
+//     width: 100,
+//     height: 100,
+//     marginTop: 20,
+//   },
 //   footer: {
 //     alignItems: 'center',
 //     paddingVertical: 10,
@@ -162,6 +174,7 @@
 
 // export default SignInScreen;
 
+
 import React, { useState } from 'react';
 import {
   View,
@@ -169,8 +182,6 @@ import {
   Image,
   StyleSheet,
   useWindowDimensions,
-  ScrollView,
-  Alert,
 } from 'react-native';
 
 import Logo from '../../../assets/images/logoName.png';
@@ -183,21 +194,15 @@ const SignInScreen = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const { height } = useWindowDimensions();
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(false);
 
-  const validateInput = (input) => {
-    const alphanumericRegex = /^[a-zA-Z0-9]+$/;
-    return alphanumericRegex.test(input);
-  };
+  const numericRegex = /^[0-9]{10}$/;
 
   const onSignInPressed = () => {
-    if (phoneNumber.length !== 10 || !Number.isInteger(Number(phoneNumber))) {
-      Alert.alert('Invalid Input', 'Phone number should contain exactly 10 digits.');
-      return;
+    if (phoneNumber.length === 10 && numericRegex.test(phoneNumber)) {
+      navigation.navigate('Main');
+    } else {
+      alert('Phone number should be of valid 10 digits');
     }
-
-    navigation.navigate('Bhuvan');
-    //console.warn('Sign In');
   };
 
   const onSignUpPress = () => {
@@ -206,48 +211,50 @@ const SignInScreen = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.content}>
-          <Image
-            source={Logo}
-            style={[styles.logo, { height: height * 0.3 }]}
-            resizeMode="contain"
-          />
+      <View style={styles.content}>
+        <Image
+          source={EmblemLogo}
+          style={styles.emblemLogo}
+          resizeMode="contain"
+        />
+        <Image
+          source={Logo}
+          style={[styles.logo, { height: height * 0.3 }]}
+          resizeMode="contain"
+        />
 
-          <CustomInput
-            name="phoneNumber"
-            placeholder="Phone Number"
-            value={phoneNumber}
-            setValue={setPhoneNumber}
-            secureTextEntry={false}
-            style={styles.input}
-          />
+        <CustomInput
+          name="phoneNumber"
+          placeholder="Phone Number"
+          value={phoneNumber}
+          setValue={setPhoneNumber}
+          secureTextEntry={false}
+          style={styles.input}
+          keyboardType="numeric"
+          maxLength={10}
+          onChangeText={(text) => {
+            const numericRegex = /^[0-9]{0,10}$/;
+            if (!numericRegex.test(text)) {
+              setPhoneNumber('');
+            }
+          }}
+        />
 
-          <CustomButton
-            text={'Sign In'}
-            onPress={onSignInPressed}
-            style={styles.signInButton}
-            textStyle={styles.signInButtonText}
-          />
+        <CustomButton
+          text={'Sign In'}
+          onPress={onSignInPressed}
+          style={styles.signInButton}
+          textStyle={styles.signInButtonText}
+        />
 
-          <CustomButton
-            text="Don't have an account? Register"
-            onPress={onSignUpPress}
-            type="TERTIARY"
-            style={styles.signUpButton}
-            textStyle={styles.signUpButtonText}
-          />
-
-          <Image
-            source={EmblemLogo}
-            style={styles.emblemLogo}
-            resizeMode="contain"
-          />
-        </View>
-      </ScrollView>
+        <CustomButton
+          text="Don't have an account? Register"
+          onPress={onSignUpPress}
+          type="TERTIARY"
+          style={styles.signUpButton}
+          textStyle={styles.signUpButtonText}
+        />
+      </View>
 
       <View style={styles.footer}>
         <Image
@@ -264,14 +271,13 @@ const SignInScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:'#E4EAF7',
-  },
-  contentContainer: {
-    flexGrow: 1,
+    backgroundColor: '#E4EAF7',
+    //backgroundColor: '#4285F4',
   },
   content: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
   },
   logo: {
@@ -299,6 +305,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
+
   signInButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -336,3 +343,4 @@ const styles = StyleSheet.create({
 });
 
 export default SignInScreen;
+

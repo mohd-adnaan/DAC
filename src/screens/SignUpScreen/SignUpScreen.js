@@ -28,7 +28,7 @@ const SignUpScreen = () => {
   };
 
   const validateName = () => {
-    const nameRegex = /^[A-Za-z]{3,25}$/;
+    const nameRegex = /^[A-Za-z0-9\s]{3,25}$/;
     return nameRegex.test(name);
   };
 
@@ -38,12 +38,12 @@ const SignUpScreen = () => {
   };
 
   const validateDesignation = () => {
-    const designationRegex = /^[A-Za-z]{3,25}$/;
+    const designationRegex =/^[A-Za-z0-9\s]{3,25}$/;
     return designationRegex.test(designation);
   };
 
   const validateDepartment = () => {
-    const departmentRegex = /^[A-Za-z]{3,25}$/;
+    const departmentRegex = /^[A-Za-z0-9\s]{3,25}$/;
     return departmentRegex.test(department);
   };
 
@@ -57,7 +57,8 @@ const SignUpScreen = () => {
   };
 
   const validateState = () => {
-    return state.trim().length > 0;
+    const stateRegex = /^[A-Za-z0-9\s]{3,25}$/;
+    return stateRegex.test(state) && state.length > 0;
   };
 
   const onRegisterPressed = () => {
@@ -98,7 +99,7 @@ const SignUpScreen = () => {
 
     // Perform registration logic here
     console.warn('Registration Successful');
-    navigation.navigate('Web');
+    navigation.navigate('Bhuvan');
   
   };
 

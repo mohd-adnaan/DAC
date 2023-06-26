@@ -20,7 +20,7 @@ const SupportScreen = ({navigation}) => {
                 <Text style={styles.heading}>Support</Text>
             </View>
             <View style={styles.description}>
-                <Text style={styles.descriptionText1}>SISDP-U Collect app is developed by Regional Centres of NRSC, ISRO for Ground Truth data collection under SISDP Update Project</Text>
+                <Text style={styles.descriptionText1}>An app to get the Digital Address Code(DAC) of the current and marked location of the user on the Indian Map.</Text>
                 {/* <Text style={styles.descriptionText2}></Text> */}
                 <Text style={styles.contacts}>For any Technical Support, Contact:</Text>
                 <Text style={[styles.contactPerson, {fontSize: 16, fontWeight: 'bold', paddingTop: 10}]}>Khushboo Mirza</Text>
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     justifyContent: 'center',
     backgroundColor: "#E4EAF7",
-    //paddingVertical: 50,
+    paddingVertical: 50,
     position: "relative"
   },
   header: {
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
 heading: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#32502E'
+    color: 'black'
 },
 description:{
     padding: 10,
@@ -65,7 +65,7 @@ description:{
     marginVertical:10,
     marginHorizontal: 10,
     borderRadius:10,
-    backgroundColor:'#1E88E5',
+    backgroundColor:'#9AC5F4',
 },
 descriptionText1:{
     fontSize:16,
