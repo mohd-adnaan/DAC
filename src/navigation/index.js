@@ -9,20 +9,24 @@ import SupportScreen from '../screens/SupportScreen';;
 import MainScreen from "../screens/MainScreen";
 import WebScreen from "../screens/WebScreen";
 import BhuvanScreen from "../screens/BhuvanScreen";
-import DrawerScreen from "../screens/DrawerScreen"; 
+import ShowMap from "../screens/ShowMap"; 
+import DrawerNavigator from "../screens/DrawerNavigator";
+import AboutScreen from "../screens/AboutScreen"
 const Stack = createNativeStackNavigator();
 const Navigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: true }}>
       <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
+        <Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
+        <Stack.Screen name="AboutScreen" component={AboutScreen} />
+        <Stack.Screen name="Support" component={SupportScreen} />
+        <Stack.Screen name="ShowMap" component={ShowMap} />
         <Stack.Screen name="Bhuvan" component={BhuvanScreen} />
         <Stack.Screen name="Web" component ={WebScreen}/>
-        <Stack.Screen name="Support" component={SupportScreen} />
-        <Stack.Screen name="Drawer" component={DrawerScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

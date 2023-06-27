@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const DrawerScreen = () => {
+const ShowMap = () => {
   return (
     <View>
-      <Text>DrawerScreen</Text>
+      <Text>ShowMap</Text>
     </View>
   )
 }
 
-export default DrawerScreen
+export default ShowMap
