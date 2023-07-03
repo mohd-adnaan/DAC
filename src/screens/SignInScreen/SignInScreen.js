@@ -199,7 +199,7 @@ const SignInScreen = () => {
 
   const onSignInPressed = () => {
     if (phoneNumber.length === 10 && numericRegex.test(phoneNumber)) {
-      navigation.navigate('Main');
+      navigation.navigate('Parent');
     } else {
       alert('Phone number should be of valid 10 digits');
     }

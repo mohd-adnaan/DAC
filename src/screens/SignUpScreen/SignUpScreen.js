@@ -1,21 +1,537 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+// import React, { useState } from 'react';
+// import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+// import CustomInput from '../../components/CustomInput';
+// import CustomButton from '../../components/CustomButton';
+// import { useNavigation } from '@react-navigation/native';
+
+// const SignUpScreen = () => {
+//   const [name, setName] = useState('');
+//   const [phoneNumber, setPhoneNumber] = useState('');
+//   const [designation, setDesignation] = useState('');
+//   const [department, setDepartment] = useState('');
+//   const [address, setAddress] = useState('');
+//   const [state, setState] = useState('');
+//   const [pin, setPin] = useState('');
+//   const [city,setCity] = useState('');
+//   const navigation = useNavigation();
+
+//   const onSignInPress = () => {
+//     navigation.navigate('SignIn');
+//   };
+
+//   const onTermsOfUsePressed = () => {
+//     console.warn('onTermsOfUsePressed');
+//   };
+
+//   const onPrivacyPressed = () => {
+//     console.warn('onPrivacyPressed');
+//   };
+
+//   const validateName = () => {
+//     const nameRegex = /^[A-Za-z0-9\s]{3,25}$/;
+//     return nameRegex.test(name);
+//   };
+
+//   const validatePhoneNumber = () => {
+//     const phoneRegex = /^[0-9]{10}$/;
+//     return phoneRegex.test(phoneNumber);
+//   };
+
+//   const validateDesignation = () => {
+//     const designationRegex =/^[A-Za-z0-9\s]{3,25}$/;
+//     return designationRegex.test(designation);
+//   };
+
+//   const validateDepartment = () => {
+//     const departmentRegex = /^[A-Za-z0-9\s]{3,25}$/;
+//     return departmentRegex.test(department);
+//   };
+
+//   const validateAddress = () => {
+//     return address.trim().length > 0;
+//   };
+
+//   const validatePin = () => {
+//     const pinRegex = /^[0-9]{6}$/;
+//     return pinRegex.test(pin);
+//   };
+
+//  const validateCity=()=>{
+//   return city.trim().length > 0;
+// }
+
+
+
+//   const validateState = () => {
+//     const stateRegex = /^[A-Za-z0-9\s]{3,25}$/;
+//     return stateRegex.test(state) && state.length > 0;
+//   };
+
+//   const onRegisterPressed = () => {
+//     if (!validateName()) {
+//       Alert.alert('Invalid Name', 'Name should contain only alphabets with a length between 3 and 25.');
+//       return;
+//     }
+
+//     if (!validatePhoneNumber()) {
+//       Alert.alert('Invalid Phone Number', 'Phone Number should contain only 10 digits.');
+//       return;
+//     }
+
+//     if (!validateDesignation()) {
+//       Alert.alert('Invalid Designation', 'Designation should contain only alphabets with a length between 3 and 25.');
+//       return;
+//     }
+
+//     if (!validateDepartment()) {
+//       Alert.alert('Invalid Department', 'Department should contain only alphabets with a length between 3 and 25.');
+//       return;
+//     }
+
+//     if (!validateAddress()) {
+//       Alert.alert('Invalid Address', 'Address should not be empty.');
+//       return;
+//     }
+
+//     if (!validateCity()) {
+//       Alert.alert('Invalid City','City should not be empty.');
+//       return;
+//     }
+
+//     if (!validateState()) {
+//       Alert.alert('Invalid State', 'State should not be empty.');
+//       return;
+//     }
+
+//     // Perform registration logic here
+//     console.warn('Registration Successful');
+//     navigation.navigate('Parent');
+
+//   };
+
+//   return (
+//     <ScrollView showsVerticalScrollIndicator={false}>
+//       <View style={styles.container}>
+//         <Text style={styles.title}>Register</Text>
+
+//         <CustomInput
+//           name="name"
+//           value={name}
+//           setValue={setName}
+//           placeholder="Name"
+//           onBlur={() => {
+//             if (!validateName()) {
+//               Alert.alert('Invalid Name', 'Name should contain only alphabets with a length between 3 and 25.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="phoneNumber"
+//           value={phoneNumber}
+//           setValue={setPhoneNumber}
+//           placeholder="Phone Number"
+//           onBlur={() => {
+//             if (!validatePhoneNumber()) {
+//               Alert.alert('Invalid Phone Number', 'Phone Number should contain only 10 digits.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="designation"
+//           value={designation}
+//           setValue={setDesignation}
+//           placeholder="Designation"
+//           onBlur={() => {
+//             if (!validateDesignation()) {
+//               Alert.alert('Invalid Designation', 'Designation should contain only alphabets with a length between 3 and 25.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="department"
+//           value={department}
+//           setValue={setDepartment}
+//           placeholder="Department"
+//           onBlur={() => {
+//             if (!validateDepartment()) {
+//               Alert.alert('Invalid Department', 'Department should contain only alphabets with a length between 3 and 25.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="address"
+//           value={address}
+//           setValue={setAddress}
+//           placeholder="Address"
+//           onBlur={() => {
+//             if (!validateAddress()) {
+//               Alert.alert('Invalid Address', 'Address should not be empty.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="city"
+//           value={city}
+//           setValue={setCity}
+//           placeholder="City"
+//           onBlur={() => {
+//              if (!validateAddress()) {
+//               Alert.alert('Invalid Address', 'City should not be empty.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="state"
+//           value={state}
+//           setValue={setState}
+//           placeholder="State"
+//           onBlur={() => {
+//             if (!validateState()) {
+//               Alert.alert('Invalid State', 'State should not be empty.');
+//             }
+//           }}
+//         />
+
+//         <CustomButton text="Register" onPress={onRegisterPressed} />
+
+//         <Text style={styles.text}>
+//           By registering, you confirm that you accept our{' '}
+//           <Text style={styles.link} onPress={onTermsOfUsePressed}>
+//             Terms of Use
+//           </Text>{' '}
+//           and{' '}
+//           <Text style={styles.link} onPress={onPrivacyPressed}>
+//             Privacy Policy
+//           </Text>
+//         </Text>
+
+//         <CustomButton
+//           text="Have an account? Sign in"
+//           onPress={onSignInPress}
+//           type="TERTIARY"
+//         />
+//       </View>
+//     </ScrollView>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     alignItems: 'center',
+//     padding: 20,
+//     backgroundColor: '#E4EAF7',
+//   },
+//   title: {
+//     fontSize: 24,
+//     fontWeight: 'bold',
+//     color: '#051C60',
+//     marginVertical: 10,
+//   },
+//   text: {
+//     color: 'gray',
+//     marginVertical: 10,
+//   },
+//   link: {
+//     color: '#FDB075',
+//   },
+// });
+
+// export default SignUpScreen;
+
+
+
+
+// import React, {useEffect, useState} from 'react';
+// import {
+//   Alert,
+//   StatusBar,
+//   StyleSheet,
+//   Text,
+//   TouchableOpacity,
+//   View,
+// } from 'react-native';
+// import {Dropdown} from 'react-native-element-dropdown';
+// import axios from 'axios';
+// import {BASE_URL, API_KEY} from '@env';
+
+// const App = () => {
+//   const [countryData, setCountryData] = useState([]);
+//   const [stateData, setStateData] = useState([]);
+//   const [cityData, setCityData] = useState([]);
+//   const [country, setCountry] = useState(null);
+//   const [state, setState] = useState(null);
+//   const [city, setCity] = useState(null);
+//   const [countryName, setCountryName] = useState(null);
+//   const [stateName, setStateName] = useState(null);
+//   const [cityName, setCityName] = useState(null);
+//   const [isFocus, setIsFocus] = useState(false);
+
+//   useEffect(() => {
+//     var config = {
+//       method: 'get',
+//       url: `${BASE_URL}/countries`,
+//       headers: {
+//         'X-CSCAPI-KEY': API_KEY,
+//       },
+//     };
+
+//     axios(config)
+//       .then(response => {
+//         console.log(JSON.stringify(response.data));
+//         var count = Object.keys(response.data).length;
+//         let countryArray = [];
+//         for (var i = 0; i < count; i++) {
+//           countryArray.push({
+//             value: response.data[i].iso2,
+//             label: response.data[i].name,
+//           });
+//         }
+//         setCountryData(countryArray);
+//       })
+//       .catch(error => {
+//         console.log(error);
+//       });
+//   }, []);
+
+//   const handleState = countryCode => {
+//     var config = {
+//       method: 'get',
+//       url: `${BASE_URL}/countries/${countryCode}/states`,
+//       headers: {
+//         'X-CSCAPI-KEY': API_KEY,
+//       },
+//     };
+
+//     axios(config)
+//       .then(function (response) {
+//         console.log(JSON.stringify(response.data));
+//         var count = Object.keys(response.data).length;
+//         let stateArray = [];
+//         for (var i = 0; i < count; i++) {
+//           stateArray.push({
+//             value: response.data[i].iso2,
+//             label: response.data[i].name,
+//           });
+//         }
+//         setStateData(stateArray);
+//       })
+//       .catch(function (error) {
+//         console.log(error);
+//       });
+//   };
+
+//   const handleCity = (countryCode, stateCode) => {
+//     var config = {
+//       method: 'get',
+//       url: `${BASE_URL}/countries/${countryCode}/states/${stateCode}/cities`,
+//       headers: {
+//         'X-CSCAPI-KEY': API_KEY,
+//       },
+//     };
+
+//     axios(config)
+//       .then(function (response) {
+//         console.log(JSON.stringify(response.data));
+//         var count = Object.keys(response.data).length;
+//         let cityArray = [];
+//         for (var i = 0; i < count; i++) {
+//           cityArray.push({
+//             value: response.data[i].id,
+//             label: response.data[i].name,
+//           });
+//         }
+//         setCityData(cityArray);
+//       })
+//       .catch(function (error) {
+//         console.log(error);
+//       });
+//   };
+
+//   return (
+//     <View style={styles.container}>
+//       <StatusBar barStyle="light-content" />
+//       <View style={{backgroundColor: '#fff', padding: 20, borderRadius: 15}}>
+//         <Dropdown
+//           style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+//           placeholderStyle={styles.placeholderStyle}
+//           selectedTextStyle={styles.selectedTextStyle}
+//           inputSearchStyle={styles.inputSearchStyle}
+//           iconStyle={styles.iconStyle}
+//           data={countryData}
+//           search
+//           maxHeight={300}
+//           labelField="label"
+//           valueField="value"
+//           placeholder={!isFocus ? 'Select country' : '...'}
+//           searchPlaceholder="Search..."
+//           value={country}
+//           onFocus={() => setIsFocus(true)}
+//           onBlur={() => setIsFocus(false)}
+//           onChange={item => {
+//             setCountry(item.value);
+//             handleState(item.value);
+//             setCountryName(item.label);
+//             setIsFocus(false);
+//           }}
+//         />
+//         <Dropdown
+//           style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+//           placeholderStyle={styles.placeholderStyle}
+//           selectedTextStyle={styles.selectedTextStyle}
+//           inputSearchStyle={styles.inputSearchStyle}
+//           iconStyle={styles.iconStyle}
+//           data={stateData}
+//           search
+//           maxHeight={300}
+//           labelField="label"
+//           valueField="value"
+//           placeholder={!isFocus ? 'Select state' : '...'}
+//           searchPlaceholder="Search..."
+//           value={state}
+//           onFocus={() => setIsFocus(true)}
+//           onBlur={() => setIsFocus(false)}
+//           onChange={item => {
+//             setState(item.value);
+//             handleCity(country, item.value);
+//             setStateName(item.label);
+//             setIsFocus(false);
+//           }}
+//         />
+//         <Dropdown
+//           style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+//           placeholderStyle={styles.placeholderStyle}
+//           selectedTextStyle={styles.selectedTextStyle}
+//           inputSearchStyle={styles.inputSearchStyle}
+//           iconStyle={styles.iconStyle}
+//           data={cityData}
+//           search
+//           maxHeight={300}
+//           labelField="label"
+//           valueField="value"
+//           placeholder={!isFocus ? 'Select city' : '...'}
+//           searchPlaceholder="Search..."
+//           value={city}
+//           onFocus={() => setIsFocus(true)}
+//           onBlur={() => setIsFocus(false)}
+//           onChange={item => {
+//             setCity(item.value);
+//             setCityName(item.label);
+//             setIsFocus(false);
+//           }}
+//         />
+//         <TouchableOpacity
+//           style={{
+//             backgroundColor: '#1E88E5',
+//             padding: 20,
+//             borderRadius: 15,
+//             alignItems: 'center',
+//           }}
+//           onPress={() =>
+//             Alert.alert(
+//               `You have selected\nCountry: ${countryName}\nState: ${stateName}\nCity: ${cityName}`,
+//             )
+//           }>
+//           <Text
+//             style={{
+//               color: '#fff',
+//               textTransform: 'uppercase',
+//               fontWeight: '600',
+//             }}>
+//             Submit
+//           </Text>
+//         </TouchableOpacity>
+//       </View>
+//     </View>
+//   );
+// };
+
+// export default App;
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#E4EAF7',
+//     padding: 16,
+//     justifyContent: 'center',
+//     alignContent: 'center',
+//   },
+//   dropdown: {
+//     height: 50,
+//     borderColor: 'gray',
+//     borderWidth: 0.5,
+//     borderRadius: 8,
+//     paddingHorizontal: 8,
+//     marginBottom: 10,
+//   },
+//   icon: {
+//     marginRight: 5,
+//   },
+//   label: {
+//     position: 'absolute',
+//     backgroundColor: 'white',
+//     left: 22,
+//     top: 8,
+//     zIndex: 999,
+//     paddingHorizontal: 8,
+//     fontSize: 14,
+//   },
+//   placeholderStyle: {
+//     fontSize: 16,
+//   },
+//   selectedTextStyle: {
+//     fontSize: 16,
+//   },
+//   iconStyle: {
+//     width: 20,
+//     height: 20,
+//   },
+//   inputSearchStyle: {
+//     height: 40,
+//     fontSize: 16,
+//   },
+// });
+
+
+
+
+import React, { useState ,useEffect} from 'react';
+import { View, Text, StyleSheet, ScrollView, Alert,StatusBar,TouchableOpacity} from 'react-native';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import { useNavigation } from '@react-navigation/native';
-
+import {Dropdown} from 'react-native-element-dropdown';
+import axios from 'axios';
+import {BASE_URL, API_KEY} from '@env';
 const SignUpScreen = () => {
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [designation, setDesignation] = useState('');
   const [department, setDepartment] = useState('');
   const [address, setAddress] = useState('');
-  const [state, setState] = useState('');
+  //const [state, setState] = useState('');
   const [pin, setPin] = useState('');
+  //const [city,setCity] = useState('');
   const navigation = useNavigation();
+  const [countryData, setCountryData] = useState([]);
+  const [stateData, setStateData] = useState([]);
+  const [cityData, setCityData] = useState([]);
+  const [country, setCountry] = useState(null);
+  const [state, setState] = useState(null);
+  const [city, setCity] = useState(null);
+  const [countryName, setCountryName] = useState(null);
+  const [stateName, setStateName] = useState(null);
+  const [cityName, setCityName] = useState(null);
+  const [isFocus, setIsFocus] = useState(false);
 
-  const onSignInPress = () => {
+    const onSignInPress = () => {
     navigation.navigate('SignIn');
   };
 
@@ -56,11 +572,6 @@ const SignUpScreen = () => {
     return pinRegex.test(pin);
   };
 
-  const validateState = () => {
-    const stateRegex = /^[A-Za-z0-9\s]{3,25}$/;
-    return stateRegex.test(state) && state.length > 0;
-  };
-
   const onRegisterPressed = () => {
     if (!validateName()) {
       Alert.alert('Invalid Name', 'Name should contain only alphabets with a length between 3 and 25.');
@@ -86,22 +597,93 @@ const SignUpScreen = () => {
       Alert.alert('Invalid Address', 'Address should not be empty.');
       return;
     }
-
-    if (!validatePin()) {
-      Alert.alert('Invalid Pin', 'Pin should contain only 6 digits.');
-      return;
-    }
-
-    if (!validateState()) {
-      Alert.alert('Invalid State', 'State should not be empty.');
-      return;
-    }
-
     // Perform registration logic here
     console.warn('Registration Successful');
-    navigation.navigate('Bhuvan');
-  
+    navigation.navigate('Parent');
+
   };
+
+    useEffect(() => {
+    var config = {
+      method: 'get',
+      url: `${BASE_URL}/countries`,
+      headers: {
+        'X-CSCAPI-KEY': API_KEY,
+      },
+    };
+
+    axios(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        var count = Object.keys(response.data).length;
+        let countryArray = [];
+        for (var i = 0; i < count; i++) {
+          countryArray.push({
+            value: response.data[i].iso2,
+            label: response.data[i].name,
+          });
+        }
+        setCountryData(countryArray);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, []);
+
+  const handleState = countryCode => {
+    var config = {
+      method: 'get',
+      url: `${BASE_URL}/countries/${countryCode}/states`,
+      headers: {
+        'X-CSCAPI-KEY': API_KEY,
+      },
+    };
+
+    axios(config)
+      .then(function (response) {
+        console.log(JSON.stringify(response.data));
+        var count = Object.keys(response.data).length;
+        let stateArray = [];
+        for (var i = 0; i < count; i++) {
+          stateArray.push({
+            value: response.data[i].iso2,
+            label: response.data[i].name,
+          });
+        }
+        setStateData(stateArray);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
+  const handleCity = (countryCode, stateCode) => {
+    var config = {
+      method: 'get',
+      url: `${BASE_URL}/countries/${countryCode}/states/${stateCode}/cities`,
+      headers: {
+        'X-CSCAPI-KEY': API_KEY,
+      },
+    };
+
+    axios(config)
+      .then(function (response) {
+        console.log(JSON.stringify(response.data));
+        var count = Object.keys(response.data).length;
+        let cityArray = [];
+        for (var i = 0; i < count; i++) {
+          cityArray.push({
+            value: response.data[i].id,
+            label: response.data[i].name,
+          });
+        }
+        setCityData(cityArray);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -168,30 +750,88 @@ const SignUpScreen = () => {
           }}
         />
 
-        <CustomInput
-          name="pin"
-          value={pin}
-          setValue={setPin}
-          placeholder="Pin"
-          onBlur={() => {
-            if (!validatePin()) {
-              Alert.alert('Invalid Pin', 'Pin should contain only 6 digits.');
-            }
+
+<View style={styles.container}>
+       <StatusBar barStyle="light-content" />
+      <View>
+        <Dropdown
+        style={[styles.customInput, isFocus && { borderColor: 'blue' }]}
+          //style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={countryData}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select country' : '...'}
+          searchPlaceholder="Search..."
+          value={country}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setCountry(item.value);
+            handleState(item.value);
+            setCountryName(item.label);
+            setIsFocus(false);
           }}
         />
+        </View>
 
-        <CustomInput
-          name="state"
+        <View>
+        <Dropdown
+        style={[styles.customInput, isFocus && { borderColor: 'blue' }]}
+         // style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={stateData}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select state' : '...'}
+          searchPlaceholder="Search..."
           value={state}
-          setValue={setState}
-          placeholder="State"
-          onBlur={() => {
-            if (!validateState()) {
-              Alert.alert('Invalid State', 'State should not be empty.');
-            }
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setState(item.value);
+            handleCity(country, item.value);
+            setStateName(item.label);
+            setIsFocus(false);
           }}
         />
-
+        </View>
+        <View>
+        <Dropdown
+          style={[styles.customInput, isFocus && { borderColor: 'blue' }]}
+          //style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={cityData}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select city' : '...'}
+          searchPlaceholder="Search..."
+          value={city}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setCity(item.value);
+            setCityName(item.label);
+            setIsFocus(false);
+          }}
+        />
+      </View>
+    </View>
         <CustomButton text="Register" onPress={onRegisterPressed} />
 
         <Text style={styles.text}>
@@ -216,17 +856,43 @@ const SignUpScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+    container: {
     flex: 1,
-    alignItems: 'center',
-    padding: 20,
     backgroundColor: '#E4EAF7',
+    padding: 16,
+    justifyContent: 'center',
+    alignContent: 'center',
+  },
+  // dropdown: {
+  //   height: 50,
+  //   borderColor: 'gray',
+  //   borderWidth: 0.5,
+  //   borderRadius: 8,
+  //   paddingHorizontal: 8,
+  //   marginBottom: 10,},
+
+  // container: {
+  //   flex: 1,
+  //   alignItems: 'center',
+  //   padding: 20,
+  //   backgroundColor: '#E4EAF7',
+  // }, 
+  customInput: {
+    backgroundColor: 'white',
+    height: 50,
+    width: '100%',
+    borderColor: '#e8e8e8',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#051C60',
     marginVertical: 10,
+    alignItems: 'center',
   },
   text: {
     color: 'gray',

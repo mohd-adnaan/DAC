@@ -5,11 +5,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import SplashScreen from '../screens/SplashScreen';
-import SupportScreen from '../screens/SupportScreen';;
+import SupportScreen from '../screens/SupportScreen';
 import MainScreen from "../screens/MainScreen";
-import WebScreen from "../screens/WebScreen";
 import BhuvanScreen from "../screens/BhuvanScreen";
 import DrawerScreen from "../screens/DrawerScreen"; 
+import ParentScreen from "../screens/ParentScreen";
+import AboutScreen from '../screens/AboutScreen';
+import SignOutScreen from '../screens/SignOutScreen/SignOutScreen';
+import SearchScreen from '../screens/SearchScreen/SearchScreen';
 const Stack = createNativeStackNavigator();
 const Navigation = () => {
   return (
@@ -20,9 +23,12 @@ const Navigation = () => {
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="Bhuvan" component={BhuvanScreen} />
-        <Stack.Screen name="Web" component ={WebScreen}/>
+        <Stack.Screen name="Parent" component={ParentScreen} />
         <Stack.Screen name="Support" component={SupportScreen} />
         <Stack.Screen name="Drawer" component={DrawerScreen} />
+        <Stack.Screen name="About" component={AboutScreen}/>
+        <Stack.Screen name="SignOutScreen" component={SignOutScreen}/>
+        <Stack.Screen name = "Search" component={SearchScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
