@@ -13,6 +13,7 @@ import ParentScreen from "../screens/ParentScreen";
 import AboutScreen from '../screens/AboutScreen';
 import SignOutScreen from '../screens/SignOutScreen/SignOutScreen';
 import SearchScreen from '../screens/SearchScreen/SearchScreen';
+import UserScreen from '../screens/UserScreen/UserScreen';
 const Stack = createNativeStackNavigator();
 const Navigation = () => {
   return (
@@ -27,7 +28,8 @@ const Navigation = () => {
         <Stack.Screen name="Support" component={SupportScreen} />
         <Stack.Screen name="Drawer" component={DrawerScreen} />
         <Stack.Screen name="About" component={AboutScreen}/>
-        <Stack.Screen name="SignOutScreen" component={SignOutScreen}/>
+        <Stack.Screen name="SignOut" component={SignOutScreen}/>
+        <Stack.Screen name="User" component={UserScreen}/>
         <Stack.Screen name = "Search" component={SearchScreen} />
       </Stack.Navigator>
     </NavigationContainer>

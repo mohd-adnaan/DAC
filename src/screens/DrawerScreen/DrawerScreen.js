@@ -8,7 +8,7 @@ import SupportScreen from '../SupportScreen/SupportScreen';
 import AboutScreen from '../AboutScreen/AboutScreen';
 import MainScreen from '../MainScreen/MainScreen';
 import SignOutScreen from '../SignOutScreen/SignOutScreen';
-import SignInScreen from '../SignInScreen/SignInScreen';
+import UserScreen from '../UserScreen/UserScreen';
 const Drawer = createDrawerNavigator();
 
 
@@ -39,14 +39,18 @@ const handleSupportPress = () => {
     ),
   })}
 />
+      <Drawer.Screen name = 'User' component={UserScreen}
+      options={{headerShown:false}}
+      />
       <Drawer.Screen name = 'Support' component ={SupportScreen}
         options={{headerShown: false}}
       />
       <Drawer.Screen name = 'About' component={AboutScreen}
         option={{headerShown:false}}
       />
-      <Drawer.Screen name = 'SignIn' component={SignInScreen}
-        
+      <Drawer.Screen name = 'SignOut' component={SignOutScreen}
+        option={{headerShown:false}}
+
       />  
     </Drawer.Navigator>
   )

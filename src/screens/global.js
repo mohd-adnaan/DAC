@@ -1,0 +1,1 @@
+global.server_url="https://bhuvan-nyayavikas.nrsc.gov.in/phoneNumber/dac_php/php/";

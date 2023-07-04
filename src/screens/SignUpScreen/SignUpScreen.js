@@ -1,22 +1,37 @@
 
-// import React, { useState } from 'react';
-// import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+
+
+
+// import React, { useState ,useEffect} from 'react';
+// import { View, Text, StyleSheet, ScrollView, Alert,StatusBar,TouchableOpacity} from 'react-native';
 // import CustomInput from '../../components/CustomInput';
 // import CustomButton from '../../components/CustomButton';
 // import { useNavigation } from '@react-navigation/native';
-
+// import {Dropdown} from 'react-native-element-dropdown';
+// import axios from 'axios';
+// import {BASE_URL, API_KEY} from '@env';
 // const SignUpScreen = () => {
 //   const [name, setName] = useState('');
 //   const [phoneNumber, setPhoneNumber] = useState('');
 //   const [designation, setDesignation] = useState('');
 //   const [department, setDepartment] = useState('');
 //   const [address, setAddress] = useState('');
-//   const [state, setState] = useState('');
+//   //const [state, setState] = useState('');
 //   const [pin, setPin] = useState('');
-//   const [city,setCity] = useState('');
+//   //const [city,setCity] = useState('');
 //   const navigation = useNavigation();
+//   const [countryData, setCountryData] = useState([]);
+//   const [stateData, setStateData] = useState([]);
+//   const [cityData, setCityData] = useState([]);
+//   const [country, setCountry] = useState(null);
+//   const [state, setState] = useState(null);
+//   const [city, setCity] = useState(null);
+//   const [countryName, setCountryName] = useState(null);
+//   const [stateName, setStateName] = useState(null);
+//   const [cityName, setCityName] = useState(null);
+//   const [isFocus, setIsFocus] = useState(false);
 
-//   const onSignInPress = () => {
+//     const onSignInPress = () => {
 //     navigation.navigate('SignIn');
 //   };
 
@@ -57,17 +72,6 @@
 //     return pinRegex.test(pin);
 //   };
 
-//  const validateCity=()=>{
-//   return city.trim().length > 0;
-// }
-
-
-
-//   const validateState = () => {
-//     const stateRegex = /^[A-Za-z0-9\s]{3,25}$/;
-//     return stateRegex.test(state) && state.length > 0;
-//   };
-
 //   const onRegisterPressed = () => {
 //     if (!validateName()) {
 //       Alert.alert('Invalid Name', 'Name should contain only alphabets with a length between 3 and 25.');
@@ -93,188 +97,13 @@
 //       Alert.alert('Invalid Address', 'Address should not be empty.');
 //       return;
 //     }
-
-//     if (!validateCity()) {
-//       Alert.alert('Invalid City','City should not be empty.');
-//       return;
-//     }
-
-//     if (!validateState()) {
-//       Alert.alert('Invalid State', 'State should not be empty.');
-//       return;
-//     }
-
 //     // Perform registration logic here
 //     console.warn('Registration Successful');
 //     navigation.navigate('Parent');
 
 //   };
 
-//   return (
-//     <ScrollView showsVerticalScrollIndicator={false}>
-//       <View style={styles.container}>
-//         <Text style={styles.title}>Register</Text>
-
-//         <CustomInput
-//           name="name"
-//           value={name}
-//           setValue={setName}
-//           placeholder="Name"
-//           onBlur={() => {
-//             if (!validateName()) {
-//               Alert.alert('Invalid Name', 'Name should contain only alphabets with a length between 3 and 25.');
-//             }
-//           }}
-//         />
-
-//         <CustomInput
-//           name="phoneNumber"
-//           value={phoneNumber}
-//           setValue={setPhoneNumber}
-//           placeholder="Phone Number"
-//           onBlur={() => {
-//             if (!validatePhoneNumber()) {
-//               Alert.alert('Invalid Phone Number', 'Phone Number should contain only 10 digits.');
-//             }
-//           }}
-//         />
-
-//         <CustomInput
-//           name="designation"
-//           value={designation}
-//           setValue={setDesignation}
-//           placeholder="Designation"
-//           onBlur={() => {
-//             if (!validateDesignation()) {
-//               Alert.alert('Invalid Designation', 'Designation should contain only alphabets with a length between 3 and 25.');
-//             }
-//           }}
-//         />
-
-//         <CustomInput
-//           name="department"
-//           value={department}
-//           setValue={setDepartment}
-//           placeholder="Department"
-//           onBlur={() => {
-//             if (!validateDepartment()) {
-//               Alert.alert('Invalid Department', 'Department should contain only alphabets with a length between 3 and 25.');
-//             }
-//           }}
-//         />
-
-//         <CustomInput
-//           name="address"
-//           value={address}
-//           setValue={setAddress}
-//           placeholder="Address"
-//           onBlur={() => {
-//             if (!validateAddress()) {
-//               Alert.alert('Invalid Address', 'Address should not be empty.');
-//             }
-//           }}
-//         />
-
-//         <CustomInput
-//           name="city"
-//           value={city}
-//           setValue={setCity}
-//           placeholder="City"
-//           onBlur={() => {
-//              if (!validateAddress()) {
-//               Alert.alert('Invalid Address', 'City should not be empty.');
-//             }
-//           }}
-//         />
-
-//         <CustomInput
-//           name="state"
-//           value={state}
-//           setValue={setState}
-//           placeholder="State"
-//           onBlur={() => {
-//             if (!validateState()) {
-//               Alert.alert('Invalid State', 'State should not be empty.');
-//             }
-//           }}
-//         />
-
-//         <CustomButton text="Register" onPress={onRegisterPressed} />
-
-//         <Text style={styles.text}>
-//           By registering, you confirm that you accept our{' '}
-//           <Text style={styles.link} onPress={onTermsOfUsePressed}>
-//             Terms of Use
-//           </Text>{' '}
-//           and{' '}
-//           <Text style={styles.link} onPress={onPrivacyPressed}>
-//             Privacy Policy
-//           </Text>
-//         </Text>
-
-//         <CustomButton
-//           text="Have an account? Sign in"
-//           onPress={onSignInPress}
-//           type="TERTIARY"
-//         />
-//       </View>
-//     </ScrollView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: 'center',
-//     padding: 20,
-//     backgroundColor: '#E4EAF7',
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     color: '#051C60',
-//     marginVertical: 10,
-//   },
-//   text: {
-//     color: 'gray',
-//     marginVertical: 10,
-//   },
-//   link: {
-//     color: '#FDB075',
-//   },
-// });
-
-// export default SignUpScreen;
-
-
-
-
-// import React, {useEffect, useState} from 'react';
-// import {
-//   Alert,
-//   StatusBar,
-//   StyleSheet,
-//   Text,
-//   TouchableOpacity,
-//   View,
-// } from 'react-native';
-// import {Dropdown} from 'react-native-element-dropdown';
-// import axios from 'axios';
-// import {BASE_URL, API_KEY} from '@env';
-
-// const App = () => {
-//   const [countryData, setCountryData] = useState([]);
-//   const [stateData, setStateData] = useState([]);
-//   const [cityData, setCityData] = useState([]);
-//   const [country, setCountry] = useState(null);
-//   const [state, setState] = useState(null);
-//   const [city, setCity] = useState(null);
-//   const [countryName, setCountryName] = useState(null);
-//   const [stateName, setStateName] = useState(null);
-//   const [cityName, setCityName] = useState(null);
-//   const [isFocus, setIsFocus] = useState(false);
-
-//   useEffect(() => {
+//     useEffect(() => {
 //     var config = {
 //       method: 'get',
 //       url: `${BASE_URL}/countries`,
@@ -355,12 +184,79 @@
 //       });
 //   };
 
+
 //   return (
-//     <View style={styles.container}>
-//       <StatusBar barStyle="light-content" />
-//       <View style={{backgroundColor: '#fff', padding: 20, borderRadius: 15}}>
+//     <ScrollView showsVerticalScrollIndicator={false}>
+//       <View style={styles.container}>
+//         <Text style={styles.title}>Register</Text>
+
+//         <CustomInput
+//           name="name"
+//           value={name}
+//           setValue={setName}
+//           placeholder="Name"
+//           onBlur={() => {
+//             if (!validateName()) {
+//               Alert.alert('Invalid Name', 'Name should contain only alphabets with a length between 3 and 25.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="phoneNumber"
+//           value={phoneNumber}
+//           setValue={setPhoneNumber}
+//           placeholder="Phone Number"
+//           onBlur={() => {
+//             if (!validatePhoneNumber()) {
+//               Alert.alert('Invalid Phone Number', 'Phone Number should contain only 10 digits.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="designation"
+//           value={designation}
+//           setValue={setDesignation}
+//           placeholder="Designation"
+//           onBlur={() => {
+//             if (!validateDesignation()) {
+//               Alert.alert('Invalid Designation', 'Designation should contain only alphabets with a length between 3 and 25.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="department"
+//           value={department}
+//           setValue={setDepartment}
+//           placeholder="Department"
+//           onBlur={() => {
+//             if (!validateDepartment()) {
+//               Alert.alert('Invalid Department', 'Department should contain only alphabets with a length between 3 and 25.');
+//             }
+//           }}
+//         />
+
+//         <CustomInput
+//           name="address"
+//           value={address}
+//           setValue={setAddress}
+//           placeholder="Address"
+//           onBlur={() => {
+//             if (!validateAddress()) {
+//               Alert.alert('Invalid Address', 'Address should not be empty.');
+//             }
+//           }}
+//         />
+
+
+// <View style={styles.container}>
+//        <StatusBar barStyle="light-content" />
+//       <View>
 //         <Dropdown
-//           style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+//         style={[styles.customInput, isFocus && { borderColor: 'blue' }]}
+//           //style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
 //           placeholderStyle={styles.placeholderStyle}
 //           selectedTextStyle={styles.selectedTextStyle}
 //           inputSearchStyle={styles.inputSearchStyle}
@@ -382,8 +278,12 @@
 //             setIsFocus(false);
 //           }}
 //         />
+//         </View>
+
+//         <View>
 //         <Dropdown
-//           style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+//         style={[styles.customInput, isFocus && { borderColor: 'blue' }]}
+//          // style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
 //           placeholderStyle={styles.placeholderStyle}
 //           selectedTextStyle={styles.selectedTextStyle}
 //           inputSearchStyle={styles.inputSearchStyle}
@@ -405,8 +305,11 @@
 //             setIsFocus(false);
 //           }}
 //         />
+//         </View>
+//         <View>
 //         <Dropdown
-//           style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+//           style={[styles.customInput, isFocus && { borderColor: 'blue' }]}
+//           //style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
 //           placeholderStyle={styles.placeholderStyle}
 //           selectedTextStyle={styles.selectedTextStyle}
 //           inputSearchStyle={styles.inputSearchStyle}
@@ -427,111 +330,236 @@
 //             setIsFocus(false);
 //           }}
 //         />
-//         <TouchableOpacity
-//           style={{
-//             backgroundColor: '#1E88E5',
-//             padding: 20,
-//             borderRadius: 15,
-//             alignItems: 'center',
-//           }}
-//           onPress={() =>
-//             Alert.alert(
-//               `You have selected\nCountry: ${countryName}\nState: ${stateName}\nCity: ${cityName}`,
-//             )
-//           }>
-//           <Text
-//             style={{
-//               color: '#fff',
-//               textTransform: 'uppercase',
-//               fontWeight: '600',
-//             }}>
-//             Submit
-//           </Text>
-//         </TouchableOpacity>
 //       </View>
 //     </View>
+//         <CustomButton text="Register" onPress={onRegisterPressed} />
+
+//         <Text style={styles.text}>
+//           By registering, you confirm that you accept our{' '}
+//           <Text style={styles.link} onPress={onTermsOfUsePressed}>
+//             Terms of Use
+//           </Text>{' '}
+//           and{' '}
+//           <Text style={styles.link} onPress={onPrivacyPressed}>
+//             Privacy Policy
+//           </Text>
+//         </Text>
+
+//         <CustomButton
+//           text="Have an account? Sign in"
+//           onPress={onSignInPress}
+//           type="TERTIARY"
+//         />
+//       </View>
+//     </ScrollView>
 //   );
 // };
 
-// export default App;
-
 // const styles = StyleSheet.create({
-//   container: {
+//     container: {
 //     flex: 1,
 //     backgroundColor: '#E4EAF7',
 //     padding: 16,
 //     justifyContent: 'center',
 //     alignContent: 'center',
 //   },
-//   dropdown: {
+//   // dropdown: {
+//   //   height: 50,
+//   //   borderColor: 'gray',
+//   //   borderWidth: 0.5,
+//   //   borderRadius: 8,
+//   //   paddingHorizontal: 8,
+//   //   marginBottom: 10,},
+
+//   // container: {
+//   //   flex: 1,
+//   //   alignItems: 'center',
+//   //   padding: 20,
+//   //   backgroundColor: '#E4EAF7',
+//   // }, 
+//   customInput: {
+//     backgroundColor: 'white',
 //     height: 50,
-//     borderColor: 'gray',
-//     borderWidth: 0.5,
-//     borderRadius: 8,
-//     paddingHorizontal: 8,
+//     width: '100%',
+//     borderColor: '#e8e8e8',
+//     borderWidth: 1,
+//     borderRadius: 5,
+//     paddingHorizontal: 10,
 //     marginBottom: 10,
 //   },
-//   icon: {
-//     marginRight: 5,
+//   title: {
+//     fontSize: 24,
+//     fontWeight: 'bold',
+//     color: '#051C60',
+//     marginVertical: 10,
+//     alignItems: 'center',
 //   },
-//   label: {
-//     position: 'absolute',
-//     backgroundColor: 'white',
-//     left: 22,
-//     top: 8,
-//     zIndex: 999,
-//     paddingHorizontal: 8,
-//     fontSize: 14,
+//   text: {
+//     color: 'gray',
+//     marginVertical: 10,
 //   },
-//   placeholderStyle: {
-//     fontSize: 16,
-//   },
-//   selectedTextStyle: {
-//     fontSize: 16,
-//   },
-//   iconStyle: {
-//     width: 20,
-//     height: 20,
-//   },
-//   inputSearchStyle: {
-//     height: 40,
-//     fontSize: 16,
+//   link: {
+//     color: '#FDB075',
 //   },
 // });
+
+// export default SignUpScreen;
+
 
 
 
 
 import React, { useState ,useEffect} from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert,StatusBar,TouchableOpacity} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert,StatusBar,TouchableOpacity,ActivityIndicator} from 'react-native';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import { useNavigation } from '@react-navigation/native';
 import {Dropdown} from 'react-native-element-dropdown';
+import DeviceInfo from 'react-native-device-info';
+import LinearGradient from 'react-native-linear-gradient';
+import NetInfo from "@react-native-community/netinfo";
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import * as Animatable from 'react-native-animatable';
+import '../global.js'
+import { Platform } from 'react-native';
 import axios from 'axios';
 import {BASE_URL, API_KEY} from '@env';
 const SignUpScreen = () => {
+
+  const navigation = useNavigation();
+  const [isLoading,setIsLoading]=useState(false)
+  const [isRegisterSuccess,setIsRegisterSuccess]=useState(false)
+  let url = global.server_url+"register.php";
+  const [IsOffline,setIsOffline]=useState(false)
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [designation, setDesignation] = useState('');
   const [department, setDepartment] = useState('');
   const [address, setAddress] = useState('');
   //const [state, setState] = useState('');
-  const [pin, setPin] = useState('');
+  const [pinCode, setPin] = useState('');
   //const [city,setCity] = useState('');
-  const navigation = useNavigation();
   const [countryData, setCountryData] = useState([]);
   const [stateData, setStateData] = useState([]);
   const [cityData, setCityData] = useState([]);
   const [country, setCountry] = useState(null);
   const [state, setState] = useState(null);
   const [city, setCity] = useState(null);
-  const [countryName, setCountryName] = useState(null);
-  const [stateName, setStateName] = useState(null);
-  const [cityName, setCityName] = useState(null);
+   const [countryName, setCountryName] = useState(null);
+   const [stateName, setStateName] = useState(null);
+   const [cityName, setCityName] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
 
-    const onSignInPress = () => {
+  
+  useEffect(() => {
+    const removeNetInfoSubscription = NetInfo.addEventListener((state) => {
+      const offline = !(state.isConnected && state.isInternetReachable);
+      console.log("offline:",offline)
+      setIsOffline(offline);
+    });
+  
+  
+    return () => removeNetInfoSubscription();
+  }, []);
+
+  let brand = DeviceInfo.getBrand();
+  let model = brand+" "+DeviceInfo.getModel()
+  let os=Platform.OS
+  let systemVersion = os+" "+DeviceInfo.getSystemVersion();
+  console.log("model",systemVersion)
+
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: name,
+      phoneNumber: phoneNumber,
+      designation: designation,
+      department: department,
+      address: address,
+      country: country,
+      state: stateData,
+      city: cityData,
+      pinCode: pinCode,
+      mob_model: model,
+      os_version: systemVersion
+    })
+  };
+  
+  
+  const register = async () => {
+    try {
+      fetch(url, requestOptions, 100)
+        .then((response) => response.json())
+        .then(response => {
+          console.log("Message: ", response.Message);
+          if (response.Code == 3) {
+            setIsLoading(false);
+            registerSuccess();
+          } else {
+            alert(response.Message);
+            setIsLoading(false);
+            setName('');
+            setPhoneNumber('');
+            setDesignation('');
+            setDepartment('');
+            setAddress('');
+            setCountryData('');
+            setStateData('');
+            setCityData('');
+            setPinCode('');
+          }
+        })
+        .catch((error) => {
+          Alert.alert("Some Error Occurred!");
+          setIsLoading(false);
+          setName('');
+          setPhoneNumber('');
+          setDesignation('');
+          setDepartment('');
+          setAddress('');
+          setCountryData('');
+          setStateData('');
+          setCityData('');
+          setPinCode('');
+        });
+    } catch (error) {
+      Alert.alert("Some Error Occurred!");
+      setIsLoading(false);
+      setName('');
+      setPhoneNumber('');
+      setDesignation('');
+      setDepartment('');
+      setAddress('');
+      setCountryData('');
+      setStateData('');
+      setCityData('');
+      setPinCode('');
+    }
+  }
+  
+  const registerSuccess = () => {
+    setIsRegisterSuccess(true);
+  
+    setTimeout(() => {
+      setIsRegisterSuccess(false);
+      navigation.navigate("LoginScreen");
+      setName('');
+      setPhoneNumber('');
+      setDesignation('');
+      setDepartment('');
+      setAddress('');
+      setCountryData('');
+      setStateData('');
+      setCityData('');
+      setPinCode('');
+    }, 3000);
+  }
+  
+  const onSignInPress = () => {
     navigation.navigate('SignIn');
   };
 
@@ -568,9 +596,9 @@ const SignUpScreen = () => {
   };
 
   const validatePin = () => {
-    const pinRegex = /^[0-9]{6}$/;
-    return pinRegex.test(pin);
-  };
+         const pinRegex = /^[0-9]{6}$/;
+         return pinRegex.test(pinCode);
+       };
 
   const onRegisterPressed = () => {
     if (!validateName()) {
@@ -597,11 +625,23 @@ const SignUpScreen = () => {
       Alert.alert('Invalid Address', 'Address should not be empty.');
       return;
     }
-    // Perform registration logic here
-    console.warn('Registration Successful');
-    navigation.navigate('Parent');
+    if(!validatePin()){
+      Alert.alert("Invalid Pin", 'Pin must of 6 digits only')
+      return;
+    }
+    if(!IsOffline){
+      //setIsLoading(true)
+      //register()
+      console.warn('Registration Successful');
+      navigation.navigate('Parent');
+    }
+      else{
+        Alert.alert("No internet connection")}
 
-  };
+
+}
+
+
 
     useEffect(() => {
     var config = {
@@ -685,7 +725,25 @@ const SignUpScreen = () => {
   };
 
 
+
   return (
+
+    isRegisterSuccess? <Animatable.View animation="bounceIn" style={{backgroundColor:'#4285F4',height:'100%',flexDirection:'column',justifyContent:'center'}}>
+    <Ionicons style={{alignSelf:'center'}}
+        name='checkmark-circle-outline'
+        type='evilicon'
+        color='#ffffff'
+        size={100}              
+      />
+      <Text style={{color:'#ffffff',alignSelf:'center',fontSize:22}}>Registration Success</Text>
+</Animatable.View>:
+isLoading ?
+  <View style={{backgroundColor:'transparent',height:'100%',flexDirection:'column',justifyContent:'center'}}>
+    <ActivityIndicator size={70} color="#4285F4" style={{alignSelf:'center'}} />
+  </View>:
+   <Animatable.View animation="fadeInUp" style={styles.container}>
+   <LinearGradient colors={['#E4EAF7', '#ffffff']} style={styles.linearGradient}>
+
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
         <Text style={styles.title}>Register</Text>
@@ -832,6 +890,17 @@ const SignUpScreen = () => {
         />
       </View>
     </View>
+    <CustomInput
+          name="pinCode"
+          value={pinCode}
+          setValue={setPin}
+          placeholder="PinCode"
+          onBlur={() => {
+            if (!validatePin()) {
+              Alert.alert('Invalid Pin', 'Pin must be of 6 digits only.');
+            }
+          }}
+        />
         <CustomButton text="Register" onPress={onRegisterPressed} />
 
         <Text style={styles.text}>
@@ -852,6 +921,10 @@ const SignUpScreen = () => {
         />
       </View>
     </ScrollView>
+
+    </LinearGradient>
+          
+    </Animatable.View>
   );
 };
 
