@@ -8,11 +8,9 @@
 	$name=test_input($DecodedData['name']);
 	$phoneNumber = test_input($DecodedData['phoneNumber']);
     $designation = test_input($DecodedData['designation']);
-    $department = test_input($DecodedData['department'])
+    $department = test_input($DecodedData['department']);
     $address = test_input($DecodedData['address']);
-    $country = test_input($DecodedData['country']);
     $state = test_input($DecodedData['state']);
-    $city = test_input($DecodedData['city']);
     $pinCode = test_input($DecodedData['pinCode']);
 	$mob_model=test_input($DecodedData['mob_model']);
 	$os_version=test_input($DecodedData['os_version']);
@@ -21,7 +19,7 @@
 	if(strlen($phoneNumber)==10 && strlen($name)>1  && strlen($pinCode)==6 ) {
 
 	$SQ = "SELECT * from users WHERE mobile = $1 ";
-	$check = pg_query_params($db_connection, $SQ, Array($mobile));
+	$check = pg_query_params($db_connection, $SQ, Array($phoneNumber));
 	if ( pg_num_rows($check)>0 )
 	{
 		$Message = "An account with this phone number already exist!";
@@ -30,7 +28,7 @@
 	}
 	else
 	{
-		$IQ = "INSERT INTO users (name, phoneNumber, designation, department , address, country , state , city , pinCode , mob_model , os_version ,id) VALUES ('$name', '$phoneNumber', '$designation', '$department' , '$address', '$country', '$state' , '$city', '$pinCode','$mob_model','$os_version','')";
+		$IQ = "INSERT INTO users (name, phoneNumber, designation, department , address, state , pinCode , mob_model , os_version ,id) VALUES ('$name', '$phoneNumber', '$designation', '$department' , '$address', '$state', '$pinCode','$mob_model','$os_version','')";
 
 		$result = pg_query($db_connection, $IQ);
 //echo $IQ;
@@ -55,5 +53,5 @@ else	{$Message="Missing parameters";
 	$Response = ["Message" => $Message,"Code"=>$code];
 	echo json_encode($Response);
 
-$db_connection->close();
+	pg_close($dbconn);
 ?>

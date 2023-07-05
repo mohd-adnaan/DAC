@@ -5,10 +5,9 @@
 	$DecodedData = json_decode($EncodedData, true);
 
 	$user_phoneNumber = test_input($DecodedData['phoneNumber']);
-//$user_mobile='9871106478';
-	if($user_mobile==10){
-	$SQ = "SELECT * from users WHERE mobile=$1";
-	$check = pg_query_params($dbconn, $sql, Array($user_mobile));
+	if(strlen($user_phoneNumber)==10){
+	$SQ = "SELECT * from users WHERE phone=$1";
+	$check = pg_query_params($dbconn, $SQ, Array($user_phoneNumber));
 	
 	if ( pg_num_rows($check)>0 )
 	{
@@ -17,13 +16,11 @@
 		$Message = "Successfully logged into account!";
 		$id = $Row["id"];
 		$name = $Row["name"];
-        $phoneNumber = $Row["phoneNumber"];
+        $phoneNumber = $Row["phone"];
         $designation = $Row["designation"];
         $department = $Row["department"];
 		$address = $Row["address"];
-        $country = $Row["country"];
         $state=$Row["state"];
-		$city = $Row["city"];
 		$pinCode=$Row["pinCode"];
 	}
 	else
@@ -35,18 +32,16 @@
 		$designation = "";
         $department = "";
 		$address = "";
-        $country = "";
         $state="";
-		$city="";
 		$pinCode="";
 	}
 	
-	$Response = ["status"=>$status, "Message" => $Message, "id" => $id, "name" => $name, "phoneNumber" => $phoneNumber, "designation" => $designation, "department" =>$department "address" => $address, "country" => $country ,"state"=>$state,, "city"=>$city , "pinCode"=>$pinCode];
+	$Response = ["status"=>$status, "Message" => $Message, "id" => $id, "name" => $name, "phoneNumber" => $phoneNumber, "designation" => $designation, "department" =>$department, "address" => $address ,"state"=>$state , "pinCode"=>$pinCode];
 	echo json_encode($Response);}
 	else{
-		$Response = ["status"=>"Failed", "Message" => "Invalid Mobile Number."];
+		$Response = ["status"=>"Failed", "Message" => "Invalid Phone Number."];
 		echo json_encode($Response);
 	}
 
-$db_connection->close();
+	pg_close($dbconn);
 ?>

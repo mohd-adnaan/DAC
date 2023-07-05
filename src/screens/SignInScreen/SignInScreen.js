@@ -434,6 +434,7 @@ import {
   Image,
   StyleSheet,
   useWindowDimensions,
+  TextInput,
 } from 'react-native';
 
 import Logo from '../../../assets/images/logoName.png';
@@ -445,6 +446,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../components/context';
 import RNRestart from 'react-native-restart';
+import LinearGradient from 'react-native-linear-gradient';
 
 import '../global.js';
 
@@ -490,9 +492,7 @@ const SignInScreen = () => {
             await AsyncStorage.setItem("designation", response.designation);
             await AsyncStorage.setItem("department", response.department);
             await AsyncStorage.setItem("address", response.address);
-            await AsyncStorage.setItem('country', response.country);
             await AsyncStorage.setItem("state", response.state);
-            await AsyncStorage.setItem("city", response.city);
             await AsyncStorage.setItem("pinCode", response.pinCode);
 
             setPhoneNumber('');
@@ -543,7 +543,8 @@ const SignInScreen = () => {
           resizeMode="contain"
         />
 
-        <CustomInput
+         {/* <TextInput
+          type="number"
           name="phoneNumber"
           placeholder="Phone Number"
           value={phoneNumber}
@@ -553,12 +554,27 @@ const SignInScreen = () => {
           keyboardType="number-pad"
           maxLength={10}
           onChangeText={(text) => {
-            const numericRegex = /^[0-9]{0,10}$/;
+           const numericRegex = /^[0-9]{0,10}$/;
             if (!numericRegex.test(text)) {
               setPhoneNumber('');
             }
           }}
-        />
+        />  */}
+        <TextInput
+  name="phoneNumber"
+  placeholder="Phone Number"
+  value={phoneNumber}
+  onChangeText={(text) => {
+    const numericRegex = /^[0-9]{0,10}$/;
+    if (numericRegex.test(text)) {
+      setPhoneNumber(text);
+    }
+  }}
+  style={{ ...styles.input, backgroundColor: 'white' }}
+  keyboardType="numeric"
+  maxLength={10}
+/>
+
 
         <CustomButton
           text={'Sign In'}

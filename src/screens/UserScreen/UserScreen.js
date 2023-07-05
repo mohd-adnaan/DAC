@@ -25,12 +25,10 @@
 //           let designation =await AsyncStorage.getItem('designation');
 //           let department = await AsyncStorage.getItem('department');
 //           let address=await AsyncStorage.getItem('address')
-//           let country=await AsyncStorage.getItem('country'); 
 //           let state=await AsyncStorage.getItem('state')
-//           let city=await AsyncStorage.getItem('city')
 //           let pinCode=await AsyncStorage.getItem('pinCode')
 //           console.log("name:",name)
-//           address=address+", "+city+", "+state+","+country+","+pinCode
+//           address=address+", "+state+","+pinCode
 //           setAddress(address);
 //           setPhoneNumber(phoneNumber);
 //           setDesignation(designation);
