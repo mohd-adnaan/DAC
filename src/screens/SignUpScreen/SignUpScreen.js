@@ -1000,11 +1000,11 @@ const SignUpScreen = () => {
   const [department, setDepartment] = useState('');
   const [address, setAddress] = useState('');
   const [state, setState] = useState('');
-  const [pinCode, setPinCode] = useState('');
+  const [pin, setPinCode] = useState('');
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false)
   const [isRegisterSuccess, setIsRegisterSuccess] = useState(false)
-  let url = global.server_url + "register.php";
+  //let url = global.server_url + "register.php";
   const [IsOffline, setIsOffline] = useState(false)
 
   useEffect(() => {
@@ -1037,16 +1037,16 @@ const SignUpScreen = () => {
       department: department,
       address: address,
       state: state,
-      pinCode: pinCode,
+      pinCode: pin,
       mob_model: model,
-      os_version: systemVersion
+      os_version: os,
     })
   };
 
 
   const register = async () => {
     try {
-      fetch(url, requestOptions, 100)
+      fetch("http://192.168.0.105/Integrate/register.php", requestOptions, 100)
         .then((response) => response.json())
         .then(response => {
           console.log("Message: ", response.Message);
@@ -1096,7 +1096,7 @@ const SignUpScreen = () => {
 
     setTimeout(() => {
       setIsRegisterSuccess(false);
-      navigation.navigate("LoginScreen");
+      navigation.navigate("SignIn");
       setName('');
       setPhoneNumber('');
       setDesignation('');
@@ -1145,9 +1145,9 @@ const SignUpScreen = () => {
     return address.trim().length > 0;
   };
 
-  const validatePinCode = () => {
-    const pinCodeRegex = /^[0-9]{6}$/;
-    return pinCodeRegex.test(pinCode);
+  const validatePin = () => {
+    const pinRegex = /^[0-9]{6}$/;
+    return pinRegex.test(pin);
   };
 
   const validateState = () => {
@@ -1181,7 +1181,7 @@ const SignUpScreen = () => {
       return;
     }
 
-    if (!validatePinCode()) {
+    if (!validatePin()) {
       Alert.alert('Invalid PinCode', 'PinCode should contain only 6 digits.');
       return;
     }
@@ -1192,10 +1192,10 @@ const SignUpScreen = () => {
     }
 
     if(!IsOffline){
-     // setIsLoading(true)
-     // register()
-      console.warn('Registration Successful');
-      navigation.navigate('MainScreen');
+     setIsLoading(true)
+     register()
+    console.warn('Registration Successful');
+    navigation.navigate('Main');
     }
       else{
         Alert.alert("No internet connection")}
@@ -1344,8 +1344,8 @@ const SignUpScreen = () => {
                   }}
                 /> */}
                 <TextInput
-  name="pinCode"
-  value={pinCode}
+  name="pin"
+  value={pin}
   onChangeText={(text) => {
     setPinCode(text);
   }}

@@ -447,15 +447,14 @@ import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../components/context';
 import RNRestart from 'react-native-restart';
 import LinearGradient from 'react-native-linear-gradient';
-
 import '../global.js';
 
 const SignInScreen = () => {
-  let url = global.server_url + "login.php";
+ // let url = "http://192.168.1.54/integrate/login.php"
   const [phoneNumber, setPhoneNumber] = useState('');
   const { height } = useWindowDimensions();
   const navigation = useNavigation();
-  const numericRegex = /^[0-9]{10}$/;
+ 
   const [IsOffline, setIsOffline] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -467,7 +466,7 @@ const SignInScreen = () => {
     });
 
     return () => removeNetInfoSubscription();
-  }, []);
+  }, [ ]);
 
   const requestOptions = {
     method: 'POST',
@@ -481,27 +480,29 @@ const SignInScreen = () => {
   const login = async () => {
     try {
       fetch(
-        url, requestOptions, 100)
+       "http://192.168.0.105/Integrate/login.php", requestOptions, 100)
         .then((response) => response.json())
         .then(async response => {
           console.log("Message: ", response.Message);
           if (response.status == "Success") {
             await AsyncStorage.setItem("IsLoggedIn", JSON.stringify(true));
             await AsyncStorage.setItem("name", response.name);
-            await AsyncStorage.setItem("phoneNumber", response.phoneNumber);
+            await AsyncStorage.setItem("phoneNumber", response.phone);
             await AsyncStorage.setItem("designation", response.designation);
             await AsyncStorage.setItem("department", response.department);
             await AsyncStorage.setItem("address", response.address);
             await AsyncStorage.setItem("state", response.state);
-            await AsyncStorage.setItem("pinCode", response.pinCode);
+            await AsyncStorage.setItem("pinCode", response.pin);
 
             setPhoneNumber('');
             setIsLoading(false);
-            RNRestart.Restart();
+            //RNRestart.Restart();
+             navigation.navigate('Parent');
+  
           } else {
             alert(response.Message);
             setIsLoading(false);
-            setMobile('');
+            setPhoneNumber('');
           }
         })
         .catch((error) => {
@@ -516,11 +517,16 @@ const SignInScreen = () => {
   };
 
   const onSignInPressed = () => {
-    if (phoneNumber.length === 10 && numericRegex.test(phoneNumber) && !IsOffline) {
-      setIsLoading(true);
-      // login()
-      navigation.navigate('Parent');
-    } else {
+    if (phoneNumber.length ==10 && !IsOffline) {
+     // setIsLoading(true);
+      login()
+    }
+    else if(IsOffline)
+      {
+        alert('Please check your internet connection');
+      }
+      else
+      {
       alert('Phone number should be of valid 10 digits');
     }
   };
@@ -530,6 +536,7 @@ const SignInScreen = () => {
   };
 
   return (
+
     <View style={styles.container}>
       <View style={styles.content}>
         <Image

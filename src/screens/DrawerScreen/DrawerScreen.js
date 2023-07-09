@@ -34,7 +34,8 @@ const handleSupportPress = () => {
     headerTitle: 'DAC',
     headerRight: () => (
       <TouchableOpacity onPress={handleSupportPress}>
-        <Icon name="information-circle-outline" size={24} color="#333" />
+      <Icon name="information-circle-outline" size={28} color="#333" style={{ marginRight: 10 }} />
+
       </TouchableOpacity>
     ),
   })}
