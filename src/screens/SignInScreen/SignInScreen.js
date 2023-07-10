@@ -480,7 +480,7 @@ const SignInScreen = () => {
   const login = async () => {
     try {
       fetch(
-       "http://192.168.0.105/Integrate/login.php", requestOptions, 100)
+       "http://192.168.43.22/Integrate/login.php", requestOptions, 100)
         .then((response) => response.json())
         .then(async response => {
           console.log("Message: ", response.Message);
