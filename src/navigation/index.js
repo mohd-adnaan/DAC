@@ -6,7 +6,7 @@ import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import SplashScreen from '../screens/SplashScreen';
 import SupportScreen from '../screens/SupportScreen';
-import MainScreen from "../screens/MainScreen";
+import MainScreen from "../screens/MainScreen/MainScreen";
 import BhuvanScreen from "../screens/BhuvanScreen";
 import DrawerScreen from "../screens/DrawerScreen"; 
 import ParentScreen from "../screens/ParentScreen";
@@ -30,7 +30,7 @@ const Navigation = () => {
         <Stack.Screen name="About" component={AboutScreen}/>
         <Stack.Screen name="SignOut" component={SignOutScreen}/>
         <Stack.Screen name="User" component={UserScreen}/>
-        <Stack.Screen name = "Search" component={SearchScreen} />
+        <Stack.Screen name ="Search" component={SearchScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

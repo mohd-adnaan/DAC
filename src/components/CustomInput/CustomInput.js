@@ -51,12 +51,25 @@ const CustomInput = ({
   //   }
   //   setValue(text);
   // };
+  // const handleChange = (text) => {
+  //   const regex = /^[^!-\/:-@\[-`{-~]+$/;
+  //   if (regex.test(text) || text === '' || text === ',' || text === '-' || text === '/' || text ==='&') {
+  //     setValue(text);
+  //   }
+  // };
+  // const handleChange = (text) => {
+  //   const regex = /^[^!-\/:-@\[-`{-~\s]+$|^[\s/-]+$/;
+  //   if (regex.test(text) || text === '' || text === ',' || text === '&' || text === '-' || text === '/') {
+  //     setValue(text);
+  //   }
+  // };
   const handleChange = (text) => {
-    const regex = /^[^!-\/:-@\[-`{-~]+$/;
-    if (regex.test(text) || text === '' || text === ',' || text === '-') {
+    const regex = /^[\w\s,/&-]*$/;
+    if (regex.test(text)) {
       setValue(text);
     }
   };
+  
   
   return (
     <View style={styles.container}>

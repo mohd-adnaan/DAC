@@ -599,10 +599,10 @@ const SignUpScreen = () => {
 
   const nameRegex = /^[A-Za-z\s]{3,25}$/;
   const phoneNumberRegex = /^[0-9]{10}$/;
-  const designationRegex = /^[A-Za-z\s]{3,50}$/;
-  const departmentRegex = /^[A-Za-z\s]{3,50}$/;
-  const addressRegex = /^.{1,}$/;
-  const stateRegex = /^[A-Za-z\s]{3,25}$/;
+  const designationRegex = /^[\w\s,/&-]{3,50}$/;
+  const departmentRegex = /^[\w\s,/&-]{3,100}$/;
+  const addressRegex = /^[\w\s,/&-]*$/;
+  const stateRegex = /^[\w\s,/&-]{3,50}$/;
   const pinRegex = /^[0-9]{6}$/;
   useEffect(() => {
     const removeNetInfoSubscription = NetInfo.addEventListener((state) => {
@@ -729,12 +729,12 @@ const SignUpScreen = () => {
   };
 
   const validateDesignation = () => {
-    const designationRegex = /^[A-Za-z0-9\s]{3,50}$/;
+    const designationRegex =/^[\w\s,/&-]{3,50}$/;
     return designationRegex.test(designation);
   };
 
   const validateDepartment = () => {
-    const departmentRegex = /^[A-Za-z0-9\s]{3,50}$/;
+    const departmentRegex =/^[\w\s,/&-]{3,100}$/;
     return departmentRegex.test(department);
   };
 
@@ -748,7 +748,7 @@ const SignUpScreen = () => {
   };
 
   const validateState = () => {
-    const stateRegex = /^[A-Za-z0-9\s]{3,25}$/;
+    const stateRegex = /^[\w\s,/&-]{3,50}$/;
     return stateRegex.test(state) && state.length > 0;
   };
 
@@ -769,7 +769,7 @@ const SignUpScreen = () => {
     }
 
     if (!validateDepartment()) {
-      Alert.alert('Invalid Department', 'Department should contain only alphabets with a length between 3 and 50.');
+      Alert.alert('Invalid Department', 'Department should contain only alphabets with a length between 3 and 75.');
       return;
     }
 
@@ -888,7 +888,7 @@ const SignUpScreen = () => {
                   placeholder="Designation"
                   onBlur={() => {
                     if (!validateDesignation()) {
-                      Alert.alert('Invalid Designation', 'Designation should contain only alphabets with a length between 3 and 25.');
+                      Alert.alert('Invalid Designation', 'Designation should contain only alphabets with a length between 3 and 50.');
                     }
                   }}
                 />
@@ -901,7 +901,7 @@ const SignUpScreen = () => {
                   placeholder="Department"
                   onBlur={() => {
                     if (!validateDepartment()) {
-                      Alert.alert('Invalid Department', 'Department should contain only alphabets with a length between 3 and 25.');
+                      Alert.alert('Invalid Department', 'Department should contain only alphabets with a length between 3 and 75.');
                     }
                   }}
                 />
@@ -1025,7 +1025,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
    // paddingVertical: 10,
     width: '100%',
-    fontSize: 16,
+    fontSize: 14,
     color: '#444',
     borderColor: '#e8e8e8',
     borderWidth: 1,

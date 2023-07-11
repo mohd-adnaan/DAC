@@ -1,37 +1,38 @@
 import cv2
-import osmnx as ox
 import numpy as np
+from flask import Flask, request, jsonify
 
-# Get the latitude and longitude of the long-press location
-latitude = 40.7128  # Replace with the latitude of the long-pressed location
-longitude = -74.0060  # Replace with the longitude of the long-pressed location
+app = Flask(__name__)
 
-# Obtain the live map screen using osmnx and the specified latitude and longitude
-graph = ox.graph_from_point((latitude, longitude), distance=500, network_type='all')
-fig, ax = ox.plot_graph(ox.project_graph(graph), show=False, close=False)
+@app.route('./Screenshot.png', methods=['POST'])
+def process_screenshot():
+    # Get the uploaded screenshot image file
+    screenshot = request.files['screenshot']
 
-# Enable long-press gesture detection in your application
-# Get the long-press coordinates and convert them to screen position (x, y)
+    # Read the image file using OpenCV
+    image = cv2.imdecode(np.fromstring(screenshot.read(), np.uint8), cv2.IMREAD_COLOR)
 
-# Capture the live screen at the long-press coordinates
-image = fig.canvas.tostring_rgb()
-width, height = fig.canvas.get_width_height()
-image = np.frombuffer(image, dtype=np.uint8).reshape(height, width, 3)
+    # Perform contour detection on the image
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
 
-# Preprocess the image
-# Convert to grayscale
-gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    # Encode the original image and the image with contours as PNG files
+    _, original_image = cv2.imencode('.png', image)
+    _, contour_image = cv2.imencode('.png', image)
 
-# Apply image thresholding
-_, threshold = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    # Convert the encoded images to byte arrays
+    original_bytes = original_image.tobytes()
+    contour_bytes = contour_image.tobytes()
 
-# Perform contour detection
-contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Prepare the response
+    response = {
+        'original_image': original_bytes,
+        'contour_image': contour_bytes
+    }
 
-# Draw the contours on the captured image
-cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
+    return jsonify(response)
 
-# Display the updated map with the highlighted building's boundary
-cv2.imshow("Live Map with Building Boundary", image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+if __name__ == '__main__':
+    app.run()
