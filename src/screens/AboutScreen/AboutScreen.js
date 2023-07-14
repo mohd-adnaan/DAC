@@ -124,15 +124,15 @@ const AboutScreen = ({ navigation }) => {
           </View>
           <View style={styles.description}>
             <Text style={styles.descriptionText}>
-              This is the About page for the DAC app developed for NRSC-North, ISRO.
-            </Text>
-            <Text style={styles.descriptionText}>
               The app allows users to sign in, access their location via GPS, mark points on a map, and retrieve unique
-              Digital Address Codes (DACs) based on latitude and longitude coordinates.
+              Digital Address Codes (DACs) based on latitude and longitude coordinates and update it by marking different position on Indian Map.
             </Text>
             <Text style={styles.descriptionText}>
               It is built using React Native for cross-platform functionality, PHP for server connectivity, and PostgreSQL as
               the database.
+            </Text>
+            <Text style={styles.descriptionText}>
+            The DAC app is developed by NRSC-North, ISRO.
             </Text>
           </View>
         </View>

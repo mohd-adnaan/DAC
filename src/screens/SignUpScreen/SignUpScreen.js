@@ -710,11 +710,11 @@ const SignUpScreen = () => {
   };
 
   const onTermsOfUsePressed = () => {
-    console.warn('onTermsOfUsePressed');
+    navigation.navigate('Terms_Privacy');
   };
 
   const onPrivacyPressed = () => {
-    console.warn('onPrivacyPressed');
+    navigation.navigate('Terms_Privacy');
   };
 
   const validateName = () => {
@@ -792,7 +792,9 @@ const SignUpScreen = () => {
      setIsLoading(true)
      register()
     console.warn('Registration Successful');
-    navigation.navigate('Parent');
+    //navigation.navigate('Parent');
+    navigation.navigate('SignIn');
+
     }
       else{
         Alert.alert("No internet connection")}

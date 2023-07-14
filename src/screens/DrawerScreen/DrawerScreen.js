@@ -3,7 +3,6 @@ import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer'
-import ParentScreen from '../ParentScreen/ParentScreen';
 import SupportScreen from '../SupportScreen/SupportScreen';
 import AboutScreen from '../AboutScreen/AboutScreen';
 import MainScreen from '../MainScreen/MainScreen';

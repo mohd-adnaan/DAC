@@ -327,12 +327,12 @@ const UserScreen = () => {
 
         <View style={{ flexDirection: 'row', marginTop: '2%', width: '90%' }}>
           <MaterialIcons
-            name="building"
-            size={40}
+            name="business"
+            size={35}
             color="#9AC5F4"
-            style={{ marginLeft: 5 }}
+          //  style={{ marginLeft: 5 }}
           />
-          <Text style={{ color: '#000000', fontSize: 20, alignSelf: 'center', marginBottom: '2%', marginLeft: 28 }}>{department}</Text>
+          <Text style={{ color: '#000000', fontSize: 20, alignSelf: 'center', marginBottom: '2%', marginLeft: 20 }}>{department}</Text>
         </View>
 
         <View style={{ flexDirection: 'row', marginTop: '2%', width: '90%' }}>
