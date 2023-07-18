@@ -207,24 +207,53 @@ const MainScreen = () => {
         const markerColor = getRandomColor();
         setSelectedLocations(prevLocations => [
           ...prevLocations,
-          { latitude, longitude, color: markerColor }, // Include color to differentiate markers
+          { latitude, longitude, color: markerColor },
         ]);
         saveLocationToBackend(latitude, longitude);
       }
     };
+    
+    // const saveLocationToBackend = async (latitude, longitude) => {
+    //   const formattedLatitude = latitude.toFixed(4);
+    //   const formattedLongitude = longitude.toFixed(4);
+    
+    //   console.log(formattedLatitude, formattedLongitude);
+    //   try {
+    //     const response = await axios.post('http://192.168.43.22/Integrate/save_location.php', {
+    //       latitude: formattedLatitude,
+    //       longitude: formattedLongitude,
+    //     });
+    //     console.log('Location data saved:', response.data);
+    //   } catch (error) {
+    //     console.error('Error:Not Passed', error);
+    //   }
+    // };
 
     const saveLocationToBackend = async (latitude, longitude) => {
+      const formattedLatitude = latitude.toFixed(4);
+      const formattedLongitude = longitude.toFixed(4);
+    
+      console.log(formattedLatitude, formattedLongitude);
       try {
-        const response = await axios.post('http://192.168.43.22/save_location.php', {
-          latitude,
-          longitude,
-        });
-        console.log('Location data saved:', response.data);
+        const requestOptions = {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            latitude: formattedLatitude,
+            longitude: formattedLongitude
+          })
+        };
+        const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
+        const responseData = await response.json();
+        console.log('Location data saved:', responseData);
       } catch (error) {
-        console.error('Error:Not Passed', error);
+        console.error('Error: Not Passed', error);
       }
     };
-
+    
   const handleSupportPress = () => {
     navigation.navigate('Support');
   };
@@ -288,22 +317,44 @@ const MainScreen = () => {
     setMarkedLocation(null);
   };
 
-  const handleGetDAC = () => {
-
-    if (markedLocation) {
-      setShowDACPopup(true);
+  const handleBuildingCV = () => {
+    if (selectedLocations.length > 0) {
+      selectedLocations.map((location, index) => {
+        setShowDACPopup(true);
+      });
     } else {
       Alert.alert(
         'No Marked Location',
-        'You have not marked any location on the Indian Map. Kindly mark a location to get the respective Digital Address Code.',
+        'You have not marked any location on the Indian Map. Kindly mark a location to get the respective Building CV and Contour.',
       );
     }
   };
-
-  const getDAC = () => {
-    console.log('getDAC');
+  
+  const getBuildingFootPrints = () => {
+    console.log('getBuildingFootPrints');
     setLayer('satellite');
-    setShowDACPopup(false);
+      
+    const requestData = {
+      latitude: selectedLocations.latitude,
+      longitude: selectedLocations.longitude,
+    };
+  
+    fetch('http://192.168.43.22:5000/members', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Response from backend:', data);
+        setShowDACPopup(false); 
+      })
+      .catch((error) => {
+        console.log('Error sending data to backend:', error);
+        setShowDACPopup(false); 
+      });
   };
 
 
@@ -382,7 +433,9 @@ const MainScreen = () => {
           )}
           {layer === 'esri' && (
             <UrlTile
-              urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'}
+             // urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'}
+            // urlTemplate = {'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+              urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
               zIndex={1}
               epsgSpec={'EPSG:90031'}
             />
@@ -484,11 +537,11 @@ const MainScreen = () => {
         <Icon name="layers" size={30} color="#333" />
       </TouchableOpacity>
 
-      {/* <TouchableOpacity
+      <TouchableOpacity
           style={styles.getDACIcon}
-          onPress={handleGetDAC}>
-          <Icon name="ios-menu" size={30} color="#333" />
-        </TouchableOpacity>  */}
+          onPress={handleBuildingCV}>
+          <Icon name="ios-analytics" size={30} color="#333" />
+        </TouchableOpacity> 
 
 
       {showDACPopup && (
@@ -498,8 +551,8 @@ const MainScreen = () => {
               <Icon name="ios-close-circle" color="gray" size={30} />
             </TouchableOpacity>
             <Text style={styles.DACPopupText}>Get your Digital Address Code (DAC) of the marked location</Text>
-            <TouchableOpacity style={styles.DACPopupButton} onPress={getDAC}>
-              <Text style={styles.DACPopupButtonText}>Get DAC</Text>
+            <TouchableOpacity style={styles.DACPopupButton} onPress={getBuildingFootPrints}>
+              <Text style={styles.DACPopupButtonText}>Mark Building Footprints</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -586,7 +639,7 @@ const MainScreen = () => {
       label={
         <>
           <Image
-            source={require('../../../assets/images/esri.png')}
+            source={require('../../../assets/images/esri_satellite.png')}
             style={styles.dialogImage}
           />
           <Text style={styles.buttonText}>Esri</Text>
@@ -630,7 +683,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     fontFamily: 'Helvetica',
   },
   footerText2: {
