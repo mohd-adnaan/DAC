@@ -14,6 +14,7 @@ import SignOutScreen from '../screens/SignOutScreen/SignOutScreen';
 import SearchScreen from '../screens/SearchScreen/SearchScreen';
 import UserScreen from '../screens/UserScreen/UserScreen';
 import Terms_PrivacyScreen from '../screens/Terms_PrivacyScreen/Terms_PrivacyScreen';
+import RegisterSuccessAnimation from "../screens/RegisterSuccessAnimation/RegisterSuccessAnimation"
 const Stack = createNativeStackNavigator();
 const Navigation = () => {
   return (
@@ -31,6 +32,7 @@ const Navigation = () => {
         <Stack.Screen name="User" component={UserScreen}/>
         <Stack.Screen name ="Search" component={SearchScreen} />
         <Stack.Screen name = "Terms_Privacy" component={Terms_PrivacyScreen}/>
+        <Stack.Screen name = "RegisterSuccess" component ={RegisterSuccessAnimation} />
       </Stack.Navigator>
     </NavigationContainer>
   );

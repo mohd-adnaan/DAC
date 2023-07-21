@@ -69,7 +69,11 @@ const CustomInput = ({
       setValue(text);
     }
   };
-  
+  const validatePhoneNumber = (text) => {
+    const phoneRegex = /^[0-9]{0,10}$/;
+    return phoneRegex.test(text);
+  };
+
   
   return (
     <View style={styles.container}>

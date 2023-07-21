@@ -9,7 +9,7 @@ import {
   TextInput,
 } from 'react-native';
 
-import Logo from '../../../assets/images/logoName.png';
+import Logo from '../../../assets/images/newlogoName.png';
 import EmblemLogo from '../../../assets/images/emblem.png';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
@@ -119,7 +119,7 @@ const SignInScreen = () => {
         <Image
           source={Logo}
           style={[styles.logo, { height: height * 0.3 }]}
-          resizeMode="contain"
+          //resizeMode="contain"
         />
 
          {/* <TextInput
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: '70%',
+    width: '80%',
     maxWidth: 300,
     maxHeight: 200,
     marginBottom: 20,

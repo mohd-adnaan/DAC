@@ -19,6 +19,7 @@
 //   UrlTile,
 //   Marker,
 //   WMSTile,
+//   Polygon,
 //   name,
 //   location,
 //   type,
@@ -34,6 +35,7 @@
 // import { captureRef } from 'react-native-view-shot';
 // import Share from 'react-native-share';
 // import RNFS from 'react-native-fs';
+// import * as Animatable from 'react-native-animatable';
 // import RNPermissions from 'react-native-permissions';
 // import shpwrite from 'shp-write';
 // import axios from 'axios';
@@ -65,6 +67,9 @@
 //   const [footerText, setFooterText] = useState('');
 //   const [showDACPopup, setShowDACPopup] = useState(false);
 //   const [loading, setLoading] = useState(false);
+//   const [coordinates, setCoordinates] = useState([]);
+//   const [dacValue, setDacValue] = useState('');
+//   const[mapPolygon, setMapPolygon] = useState(false); 
 
 //   useEffect(() => {
 //     requestCameraPermission();
@@ -72,6 +77,11 @@
 //   useEffect(() => {
 //     requestPermission();
 //   }, []);
+//   useEffect(() => {
+//     if (mapPolygon) {
+//       drawPolygon(coordinates);
+//     }
+//   }, [mapPolygon]);
 
 //   const requestCameraPermission = async () => {
 //     try {
@@ -124,13 +134,11 @@
 //       const permission = await PermissionsAndroid.check(
 //         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
 //       );
-
 //       if (!permission) {
 //         await requestStoragePermission();
 //         return;
 //       }
-
-//       const filePath = `${RNFS.PicturesDirectoryPath}/screenshot.png`; // File path in the Pictures directory
+//       const filePath = `${RNFS.PicturesDirectoryPath}/screenshot.png`; 
 //       await RNFS.copyFile(imageUri, filePath);
 //       console.log('Screenshot saved to:', filePath);
 //       Alert.alert('Screenshot saved to:', filePath);
@@ -138,8 +146,6 @@
 //       console.log('Error saving screenshot:', error);
 //     }
 //   };
-
-
 
 //   const getRandomColor = () => {
 //     const colors = ['blue', 'green', 'purple', 'orange', 'red'];
@@ -200,7 +206,7 @@
 //     }
 //   };
 //   const handleMapPress = event => {
-    
+
 //       setSelectedLocations([]);
 //       if (mapping) {
 //         const { latitude, longitude } = event.nativeEvent.coordinate;
@@ -217,53 +223,88 @@
 //       const data = await fetchDataFromBackend();
 //       displayDataOnMap(data);
 //     };
-    
 //     const fetchDataFromBackend = async () => {
 //       try {
 //         const response = await fetch('http://192.168.43.22/Integrate/getDAC.php');
-//         const responseData = await response.text(); // Get the raw response as text
-//         console.log('Raw Response:', responseData); // Log the raw response for inspection
-    
-//         const data = await response.json();
+//         const data = await response.json(); // Parse the JSON response directly
+
+//         console.log('Raw Response:', data); // Log the parsed JSON data for inspection
+
 //         return data;
 //       } catch (error) {
 //         console.error('Error fetching data:', error);
 //         return null;
 //       }
 //     };
-    
-    
+
+
 //     const displayDataOnMap = (data) => {
 //       if (!data || !data.dac || !data.geom) {
 //         console.error('Invalid data received from backend');
 //         return;
 //       }
-    
-//       alert('DAC: ' + data.dac);
-    
-//       const coordinates = JSON.parse(data.geom);
-    
+//       setDacValue(data.dac);
+//     //  Alert.alert('DAC: ' + data.dac);
+
+//       let coordinates;
+//       try {
+//         const parsedGeom = JSON.parse(data.geom);
+
+//         // Check if the parsedGeom is a MultiPolygon and extract the coordinates
+//         if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
+//           coordinates = parsedGeom.coordinates[0][0]; // Extract the first set of coordinates
+//         } else {
+//           throw new Error('Invalid geometry type or coordinates');
+//         }
+//       } catch (error) {
+//         console.error('Error parsing coordinates:', error);
+//         return;
+//       }
+
+//       if (!Array.isArray(coordinates) || coordinates.length === 0) {
+//         console.error('Invalid coordinates received from backend');
+//         return;
+//       }
+//       console.log(coordinates)
+//       setCoordinates(coordinates);
+
+//       setMapPolygon(true);
 //       drawPolygon(coordinates);
+
 //     };
-    
-//     // Assuming you have the map object available as 'map'
+
+
 //     const drawPolygon = (coordinates) => {
-//       const polygon = new google.maps.Polygon({
-//         paths: coordinates,
-//         strokeColor: '#FF0000',
-//         strokeOpacity: 0.8,
-//         strokeWeight: 2,
-//         fillColor: '#FF0000',
-//         fillOpacity: 0.35
-//       });
-    
-//       polygon.setMap(map);
+//       if (!Array.isArray(coordinates) || coordinates.length === 0) {
+//         return null; 
+//       }
+
+//       const polygonCoordinates = coordinates.map((coordinate) => ({
+//         latitude: coordinate[1],
+//         longitude: coordinate[0],
+//       }));
+
+//       const polygon = (
+//         <Polygon
+//           key="polygon"
+//           coordinates={polygonCoordinates}
+//           strokeWidth={5}  
+//           zIndex={5}
+//           strokeColor="#FF0000"
+//           strokeOpacity={0.8}
+//           fillColor="#FF0000"
+//           fillOpacity={0.35}
+//         />
+//       );
+
+//       return polygon;
 //     };
+
 
 //     const saveLocationToBackend = async (latitude, longitude) => {
 //       const formattedLatitude = latitude.toFixed(4);
 //       const formattedLongitude = longitude.toFixed(4);
-    
+
 //       console.log(formattedLatitude, formattedLongitude);
 //       try {
 //         const requestOptions = {
@@ -273,8 +314,8 @@
 //             'Content-Type': 'application/json'
 //           },
 //           body: JSON.stringify({
-//             latitude: formattedLatitude,
-//             longitude: formattedLongitude
+//             latitude:formattedLatitude,//86.487591
+//             longitude:formattedLongitude//86.487591
 //           })
 //         };
 //         const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
@@ -284,7 +325,7 @@
 //         console.error('Error: Not Passed', error);
 //       }
 //     };
-    
+
 //   const handleSupportPress = () => {
 //     navigation.navigate('Support');
 //   };
@@ -328,6 +369,7 @@
 //     }, 2000);
 
 //   };
+
 //   const handleUpdateMarkedLocation = () => {
 //     closeModal();
 //     setMapping(true);
@@ -339,13 +381,24 @@
 //     if (markedLocation) {
 //       setBoundaryMarkers(prevMarkers => [...prevMarkers, markedLocation]);
 //       setMarkedLocation(null);
+
+//       const zoomedRegion = {
+//         latitude: 86.487591,
+//         longitude: 86.487591,
+//         latitudeDelta: 0.1,
+//         longitudeDelta: 0.1,
+//       };
+//       mapViewRef.current?.animateToRegion(zoomedRegion, 1000);
 //     }
 //   };
+
 //   const handleMapReset = () => {
 //     setMapping(false);
 //     setBoundaryMarkers([]);
 //     setSelectedLocations([]);
 //     setMarkedLocation(null);
+//     setDacValue(null);
+//     setMapPolygon(false);
 //   };
 
 //   const handleBuildingCV = () => {
@@ -360,16 +413,16 @@
 //       );
 //     }
 //   };
-  
+
 //   const getBuildingFootPrints = () => {
 //     console.log('getBuildingFootPrints');
 //     setLayer('satellite');
-      
+
 //     const requestData = {
 //       latitude: selectedLocations.latitude,
 //       longitude: selectedLocations.longitude,
 //     };
-  
+
 //     fetch('http://192.168.43.22:5000/members', {
 //       method: 'POST',
 //       headers: {
@@ -446,6 +499,13 @@
 //           zoomEnabled={true}
 //           onLongPress={handleMapPress}
 //         >
+//           {mapPolygon && (
+//   <>
+//     {drawPolygon(coordinates)}
+//     {console.log(coordinates)}
+//   </>
+// )}
+
 //           {layer === 'osm' && (
 //             <WMSTile
 //               urlTemplate={
@@ -484,18 +544,9 @@
 //           {selectedCoordinate && (
 //             <Marker coordinate={selectedCoordinate} pinColor={markerColor} />
 //           )}
-//           {contourCoordinates.map((coordinate, index) => (
-//             <Polyline
-//               key={index}
-//               coordinates={coordinate}
-//               strokeColor="red"
-//               strokeWidth={2}
-//             />
-//           ))}
 //         </MapView>
 
 //       </View>
-
 
 //       {loading && (
 //         <View style={styles.loadingContainer}>
@@ -609,11 +660,15 @@
 //         Marked Location: {location.latitude.toFixed(4)}° N, {location.longitude.toFixed(4)}° E
 //       </Text>
 //     ))}
+//     <View style={styles.line} />
+//     {mapPolygon && <Text style={styles.markedLocationText}>Your DAC  :  {dacValue}</Text>}
 //           <Text style={[styles.footerText, styles.designText]}>
 //             GPS Accuracy : 600 meters
 //           </Text>
+
 //         </View>
 //       </View>
+
 
 //       <Dialog.Container visible={showMapOptions}>
 //   <Dialog.Title>Map Options</Dialog.Title>
@@ -1096,7 +1151,6 @@
 
 
 
-
 import React, { useEffect, useState, useRef } from 'react';
 import {
   Dimensions,
@@ -1168,8 +1222,8 @@ const MainScreen = () => {
   const [loading, setLoading] = useState(false);
   const [coordinates, setCoordinates] = useState([]);
   const [dacValue, setDacValue] = useState('');
-  const[mapPolygon, setMapPolygon] = useState(false); 
-
+  const [mapPolygon, setMapPolygon] = useState(false);
+  const [shapeType,setShapeType]=useState('')
   useEffect(() => {
     requestCameraPermission();
   }, []);
@@ -1181,7 +1235,7 @@ const MainScreen = () => {
       drawPolygon(coordinates);
     }
   }, [mapPolygon]);
-    
+
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -1309,126 +1363,125 @@ const MainScreen = () => {
     }
   };
   const handleMapPress = event => {
-    
-      setSelectedLocations([]);
-      if (mapping) {
-        const { latitude, longitude } = event.nativeEvent.coordinate;
-        const markerColor = getRandomColor();
-        setSelectedLocations(prevLocations => [
-          ...prevLocations,
-          { latitude, longitude, color: markerColor },
-        ]);
-        saveLocationToBackend(latitude, longitude);
-        fetchDataAndDisplayOnMap();
-      }
-    };
-    const fetchDataAndDisplayOnMap = async () => {
-      const data = await fetchDataFromBackend();
-      displayDataOnMap(data);
-    };
-    const fetchDataFromBackend = async () => {
-      try {
-        const response = await fetch('http://192.168.43.22/Integrate/getDAC.php');
-        const data = await response.json(); // Parse the JSON response directly
-    
-        console.log('Raw Response:', data); // Log the parsed JSON data for inspection
-    
-        return data;
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        return null;
-      }
-    };
-    
- 
-    const displayDataOnMap = (data) => {
-      if (!data || !data.dac || !data.geom) {
-        console.error('Invalid data received from backend');
-        return;
-      }
-      setDacValue(data.dac);
-    //  Alert.alert('DAC: ' + data.dac);
-    
-      let coordinates;
-      try {
-        const parsedGeom = JSON.parse(data.geom);
-    
-        // Check if the parsedGeom is a MultiPolygon and extract the coordinates
-        if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
-          coordinates = parsedGeom.coordinates[0][0]; // Extract the first set of coordinates
-        } else {
-          throw new Error('Invalid geometry type or coordinates');
-        }
-      } catch (error) {
-        console.error('Error parsing coordinates:', error);
-        return;
-      }
-    
-      if (!Array.isArray(coordinates) || coordinates.length === 0) {
-        console.error('Invalid coordinates received from backend');
-        return;
-      }
-      console.log(coordinates)
-      setCoordinates(coordinates);
-    
-      setMapPolygon(true);
-      drawPolygon(coordinates);
-      
-    };
- 
-    
-    const drawPolygon = (coordinates) => {
-      if (!Array.isArray(coordinates) || coordinates.length === 0) {
-        return null; // Return null or a placeholder element
-      }
-    
-      const polygonCoordinates = coordinates.map((coordinate) => ({
-        latitude: coordinate[1],
-        longitude: coordinate[0],
-      }));
-    
-      const polygon = (
-        <Polygon
-          key="polygon"
-          coordinates={polygonCoordinates}
-          strokeWidth={5}  
-          zIndex={5}
-          strokeColor="#FF0000"
-          strokeOpacity={0.8}
-          fillColor="#FF0000"
-          fillOpacity={0.35}
-        />
-      );
-    
-      return polygon;
-    };
-    
 
-    const saveLocationToBackend = async (latitude, longitude) => {
-      const formattedLatitude = latitude.toFixed(4);
-      const formattedLongitude = longitude.toFixed(4);
-    
-      console.log(formattedLatitude, formattedLongitude);
-      try {
-        const requestOptions = {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            latitude:86.487591, //formattedLatitude,
-            longitude:25.319167// formattedLongitude
-          })
-        };
-        const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
-        const responseData = await response.json();
-        console.log('Location data saved:', responseData);
-      } catch (error) {
-        console.error('Error: Not Passed', error);
+    setSelectedLocations([]);
+    if (mapping) {
+      const { latitude, longitude } = event.nativeEvent.coordinate;
+      const markerColor = getRandomColor();
+      setSelectedLocations(prevLocations => [
+        ...prevLocations,
+        { latitude, longitude, color: markerColor },
+      ]);
+      saveLocationToBackend(latitude, longitude);
+      fetchDataAndDisplayOnMap();
+    }
+  };
+  const fetchDataAndDisplayOnMap = async () => {
+    const data = await fetchDataFromBackend();
+    displayDataOnMap(data);
+  };
+  const fetchDataFromBackend = async () => {
+    try {
+      const response = await fetch('http://192.168.43.22/Integrate/getDAC.php');
+      const data = await response.json(); // Parse the JSON response directly
+
+      console.log('Raw Response:', data); // Log the parsed JSON data for inspection
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      return null;
+    }
+  };
+
+
+  const displayDataOnMap = (data) => {
+    if (!data || !data.dac || !data.geom) {
+      console.error('Invalid data received from backend');
+      return;
+    }
+    setDacValue(data.dac);
+    //  Alert.alert('DAC: ' + data.dac);
+
+    let coordinates;
+    try {
+      const parsedGeom = JSON.parse(data.geom);
+
+      // Check if the parsedGeom is a MultiPolygon and extract the coordinates
+      if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
+        coordinates = parsedGeom.coordinates[0][0]; // Extract the first set of coordinates
+      } else {
+        throw new Error('Invalid geometry type or coordinates');
       }
-    };
-    
+    } catch (error) {
+      console.error('Error parsing coordinates:', error);
+      return;
+    }
+
+    if (!Array.isArray(coordinates) || coordinates.length === 0) {
+      console.error('Invalid coordinates received from backend');
+      return;
+    }
+    console.log(coordinates)
+    setCoordinates(coordinates);
+
+    setMapPolygon(true);
+    drawPolygon(coordinates);
+
+  };
+
+  const drawPolygon = (coordinates) => {
+    if (!Array.isArray(coordinates) || coordinates.length === 0) {
+      return null; // Return null or a placeholder element
+    }
+
+    const polygonCoordinates = coordinates.map((coordinate) => ({
+      latitude: coordinate[1],
+      longitude: coordinate[0],
+    }));
+
+    const polygon = (
+      <Polygon
+        key="polygon"
+        coordinates={polygonCoordinates}
+        strokeWidth={5}
+        zIndex={5}
+        strokeColor="#FF0000"
+        strokeOpacity={0.8}
+        fillColor="#FF0000"
+        fillOpacity={0.35}
+      />
+    );
+
+    return polygon;
+  };
+
+
+  const saveLocationToBackend = async (latitude, longitude) => {
+    const formattedLatitude = latitude.toFixed(4);
+    const formattedLongitude = longitude.toFixed(4);
+
+    console.log(formattedLatitude, formattedLongitude);
+    try {
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          latitude: 86.4851,//86.487591, //formattedLatitude,
+          longitude: 25.3422//25.319167// formattedLongitude
+        })
+      };
+      const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
+      const responseData = await response.json();
+      console.log('Location data saved:', responseData);
+    } catch (error) {
+      console.error('Error: Not Passed', error);
+    }
+  };
+
   const handleSupportPress = () => {
     navigation.navigate('Support');
   };
@@ -1506,16 +1559,15 @@ const MainScreen = () => {
       );
     }
   };
-  
+
   const getBuildingFootPrints = () => {
     console.log('getBuildingFootPrints');
     setLayer('satellite');
-      
+
     const requestData = {
       latitude: selectedLocations.latitude,
       longitude: selectedLocations.longitude,
     };
-  
     fetch('http://192.168.43.22:5000/members', {
       method: 'POST',
       headers: {
@@ -1526,44 +1578,25 @@ const MainScreen = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log('Response from backend:', data);
-        setShowDACPopup(false); 
+        setShowDACPopup(false);
       })
       .catch((error) => {
         console.log('Error sending data to backend:', error);
-        setShowDACPopup(false); 
+        setShowDACPopup(false);
       });
   };
 
-
   const handleGetContour = () => {
-    if (markedLocation) {
-      const requestData = {
-        latitude: markedLocation.latitude,
-        longitude: markedLocation.longitude,
-      };
-
-      fetch('http://192.168.43.22:5000/members', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log('Response from backend:', data);
-        })
-        .catch((error) => {
-          console.log('Error sending data to backend:', error);
-        });
+    if (selectedLocations.length > 0) {
+      setShapeType(Polygon);
     } else {
       Alert.alert(
         'No Marked Location',
-        'You have not marked any location on the Indian Map. Kindly mark a location to get the respective Contour detection around marked location.',
+        'You have not marked any location on the Indian Map. Kindly mark a location to get the respective Contour detection around the marked location.',
       );
     }
   };
-
+  
 
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -1592,7 +1625,7 @@ const MainScreen = () => {
           zoomEnabled={true}
           onLongPress={handleMapPress}
         >
-          {mapPolygon && drawPolygon(coordinates)}
+          {/* {mapPolygon && drawPolygon(coordinates)} */}
 
           {layer === 'osm' && (
             <WMSTile
@@ -1612,8 +1645,8 @@ const MainScreen = () => {
           )}
           {layer === 'esri' && (
             <UrlTile
-             // urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'}
-            // urlTemplate = {'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+              // urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'}
+              // urlTemplate = {'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
               urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
               zIndex={1}
               epsgSpec={'EPSG:90031'}
@@ -1633,12 +1666,23 @@ const MainScreen = () => {
             <Marker coordinate={selectedCoordinate} pinColor={markerColor} />
           )}
 
-     
+          <View>
+            {shapeType == "Polygon" ?
+              loc.map(marker => (
+                <View key={Math.random()}>
+                  <Marker title={name} description={landuseClass} identifier={marker._id}
+                    key={Math.random()} coordinate={{ latitude: marker.latitude, longitude: marker.longitude }} />
+                  <Polygon key={Math.random()} coordinates={loc} strokeWidth={5} zIndex={5} />
+                </View>
+              )) : null}
+          </View>
+
+
         </MapView>
 
       </View>
 
-  
+
 
       {loading && (
         <View style={styles.loadingContainer}>
@@ -1712,10 +1756,10 @@ const MainScreen = () => {
       </TouchableOpacity>
 
       <TouchableOpacity
-          style={styles.getDACIcon}
-          onPress={handleBuildingCV}>
-          <Icon name="ios-analytics" size={30} color="#333" />
-        </TouchableOpacity> 
+        style={styles.getDACIcon}
+        onPress={handleBuildingCV}>
+        <Icon name="ios-analytics" size={30} color="#333" />
+      </TouchableOpacity>
 
 
       {showDACPopup && (
@@ -1732,11 +1776,11 @@ const MainScreen = () => {
         </View>
       )}
 
-      {/* <TouchableOpacity
+      {/* {<TouchableOpacity
           style={styles.ContourIcon}
           onPress={handleGetContour}>
-          <Icon name="ios-analytics" size={30} color="#333" />
-        </TouchableOpacity>  */}
+          <Icon name="layers" size={30} color="#333" />
+        </TouchableOpacity>  } */}
 
       <View style={styles.footer}>
         <View style={styles.locationContainer}>
@@ -1745,94 +1789,94 @@ const MainScreen = () => {
             {mLong !== null ? mLong.toFixed(4) : 77.209}° E
           </Text>
           {selectedLocations.length > 0 && (
-  <View style={styles.line} />
-)}
-          {selectedLocations.map((location,index) => (
-      <Text key={index} style={styles.markedLocationText}>
-        Marked Location: {location.latitude.toFixed(4)}° N, {location.longitude.toFixed(4)}° E
-      </Text>
-    ))}
-    <View style={styles.line} />
-    {mapPolygon && <Text style={styles.markedLocationText}>Your DAC  :  {dacValue}</Text>}
+            <View style={styles.line} />
+          )}
+          {selectedLocations.map((location, index) => (
+            <Text key={index} style={styles.markedLocationText}>
+              Marked Location: {location.latitude.toFixed(4)}° N, {location.longitude.toFixed(4)}° E
+            </Text>
+          ))}
+          <View style={styles.line} />
+          {mapPolygon && <Text style={styles.markedLocationText}>Your DAC  :  {dacValue}</Text>}
           <Text style={[styles.footerText, styles.designText]}>
             GPS Accuracy : 600 meters
           </Text>
-          
+
         </View>
       </View>
-     
+
 
       <Dialog.Container visible={showMapOptions}>
-  <Dialog.Title>Map Options</Dialog.Title>
-  <Dialog.Description>Choose a map option:</Dialog.Description>
-  <View style={styles.rowContainer}>
-    <Dialog.Button
-      label={
-        <>
-          <Image
-            source={require('../../../assets/images/default.png')}
-            style={styles.dialogImage}
+        <Dialog.Title>Map Options</Dialog.Title>
+        <Dialog.Description>Choose a map option:</Dialog.Description>
+        <View style={styles.rowContainer}>
+          <Dialog.Button
+            label={
+              <>
+                <Image
+                  source={require('../../../assets/images/default.png')}
+                  style={styles.dialogImage}
+                />
+                <Text style={styles.buttonText}>OSM</Text>
+              </>
+            }
+            onPress={() => {
+              setLayer('bhuvan');
+              setShowMapOptions(false);
+            }}
           />
-          <Text style={styles.buttonText}>OSM</Text>
-        </>
-      }
-      onPress={() => {
-        setLayer('bhuvan');
-        setShowMapOptions(false);
-      }}
-    />
-    <Dialog.Button
-      label={
-        <>
-          <Image
-            source={require('../../../assets/images/osm.png')}
-            style={styles.dialogImage}
+          <Dialog.Button
+            label={
+              <>
+                <Image
+                  source={require('../../../assets/images/osm.png')}
+                  style={styles.dialogImage}
+                />
+                <Text style={styles.buttonText}>Bhuvan</Text>
+              </>
+            }
+            onPress={() => {
+              setLayer('osm');
+              setShowMapOptions(false);
+            }}
           />
-          <Text style={styles.buttonText}>Bhuvan</Text>
-        </>
-      }
-      onPress={() => {
-        setLayer('osm');
-        setShowMapOptions(false);
-      }}
-    />
-  </View>
-  <View style={styles.rowContainer}>
-    <Dialog.Button
-      label={
-        <>
-          <Image
-            source={require('../../../assets/images/satellite.png')}
-            style={styles.dialogImage}
+        </View>
+        <View style={styles.rowContainer}>
+          <Dialog.Button
+            label={
+              <>
+                <Image
+                  source={require('../../../assets/images/satellite.png')}
+                  style={styles.dialogImage}
+                />
+                <Text style={styles.buttonText}>Satellite</Text>
+              </>
+            }
+            onPress={() => {
+              setLayer('satellite');
+              setShowMapOptions(false);
+            }}
           />
-          <Text style={styles.buttonText}>Satellite</Text>
-        </>
-      }
-      onPress={() => {
-        setLayer('satellite');
-        setShowMapOptions(false);
-      }}
-    />
-    <Dialog.Button
-      label={
-        <>
-          <Image
-            source={require('../../../assets/images/esri_satellite.png')}
-            style={styles.dialogImage}
+          <Dialog.Button
+            label={
+              <>
+                <Image
+                  source={require('../../../assets/images/esri_satellite.png')}
+                  style={styles.dialogImage}
+                />
+                <Text style={styles.buttonText}>Esri</Text>
+              </>
+            }
+            onPress={() => {
+              setLayer('esri');
+              setShowMapOptions(false);
+            }}
           />
-          <Text style={styles.buttonText}>Esri</Text>
-        </>
-      }
-      onPress={() => {
-        setLayer('esri');
-        setShowMapOptions(false);
-      }}
-    />
-  </View>
-  <TouchableOpacity style={styles.closeIconContainer} onPress={closePreview}>
-    <Icon name="close" size={40} color="black" />
-  </TouchableOpacity>
-</Dialog.Container>
+        </View>
+        <TouchableOpacity style={styles.closeIconContainer} onPress={closePreview}>
+          <Icon name="close" size={40} color="black" />
+        </TouchableOpacity>
+      </Dialog.Container>
 
 
       <Dialog.Container visible={showAlert}>
@@ -2047,7 +2091,7 @@ const styles = StyleSheet.create({
   },
   markedLocationText: {
     fontSize: 14,
-   // fontWeight: 'bold',
+    // fontWeight: 'bold',
     marginBottom: 10,
 
   },
