@@ -9,9 +9,8 @@ def members():
     # Retrieve latitude and longitude from the request payload
     latitude = request.json.get("latitude")
     longitude = request.json.get("longitude")
-
-    # Process the latitude and longitude as needed
-    # ...
+    
+   
 
     # Return a response indicating successful data handling
     response_data = {"message": "Data Sent Successfully"}

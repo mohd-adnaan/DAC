@@ -1148,7 +1148,7 @@
 // export default MainScreen;
 
 
-
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -1220,22 +1220,23 @@ const MainScreen = () => {
   const [footerText, setFooterText] = useState('');
   const [showDACPopup, setShowDACPopup] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [coordinates, setCoordinates] = useState([]);
   const [dacValue, setDacValue] = useState('');
   const [mapPolygon, setMapPolygon] = useState(false);
-  const [shapeType,setShapeType]=useState('')
+  const [shapeType, setShapeType] = useState('')
+  const [markers, setMarkers] = useState([]);
+  const [polygonCoordinates, setPolygonCoordinates] = useState([]);
+  const [isDrawingEnabled, setDrawingEnabled] = useState(false);
+  const [coordinates, setCoordinates] = useState([]);
   useEffect(() => {
     requestCameraPermission();
+    fetchDataAndDisplayOnMap();
   }, []);
   useEffect(() => {
     requestPermission();
   }, []);
   useEffect(() => {
-    if (mapPolygon) {
-      drawPolygon(coordinates);
-    }
-  }, [mapPolygon]);
-
+    drawPolygon();
+  }, [markers]);
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -1305,7 +1306,7 @@ const MainScreen = () => {
 
 
   const getRandomColor = () => {
-    const colors = ['blue', 'green', 'purple', 'orange', 'red'];
+    const colors = ['#4285F4', '#34A853', '#FBBC05', '#EA4335',];
     const randomIndex = Math.floor(Math.random() * colors.length);
     return colors[randomIndex];
   };
@@ -1362,30 +1363,55 @@ const MainScreen = () => {
       setShowMarkedLocationModal(true);
     }
   };
-  const handleMapPress = event => {
 
-    setSelectedLocations([]);
-    if (mapping) {
-      const { latitude, longitude } = event.nativeEvent.coordinate;
-      const markerColor = getRandomColor();
-      setSelectedLocations(prevLocations => [
-        ...prevLocations,
-        { latitude, longitude, color: markerColor },
-      ]);
-      saveLocationToBackend(latitude, longitude);
-      fetchDataAndDisplayOnMap();
+
+  const handleMapPress = event => {
+    if (isDrawingEnabled) {
+      if (mapping && markers.length < 16) {
+        const { latitude, longitude } = event.nativeEvent.coordinate;
+        const markerColor = getRandomColor();
+        setSelectedLocations(prevLocations => [
+          ...prevLocations,
+          { latitude, longitude, color: markerColor },
+        ]);
+        setMarkers(prevMarkers => [
+          ...prevMarkers,
+          { latitude, longitude, color: markerColor },
+        ]);
+        saveLocationToBackend(latitude, longitude);
+        fetchDataAndDisplayOnMap();
+      } else if (mapping && markers.length === 16) {
+        Alert.alert(
+          'Maximum Positions Reached',
+          'You have marked the maximum allowed positions (16).',
+        );
+      }
+    } else {
+      setSelectedLocations([]);
+      if (mapping) {
+        const { latitude, longitude } = event.nativeEvent.coordinate;
+        const markerColor = getRandomColor();
+        setSelectedLocations(prevLocations => [
+          ...prevLocations,
+          { latitude, longitude, color: markerColor },
+        ]);
+        saveLocationToBackend(latitude, longitude);
+        fetchDataAndDisplayOnMap();
+      }
     }
   };
+
   const fetchDataAndDisplayOnMap = async () => {
     const data = await fetchDataFromBackend();
     displayDataOnMap(data);
   };
+
   const fetchDataFromBackend = async () => {
     try {
       const response = await fetch('http://192.168.43.22/Integrate/getDAC.php');
-      const data = await response.json(); // Parse the JSON response directly
+      const data = await response.json();
 
-      console.log('Raw Response:', data); // Log the parsed JSON data for inspection
+      console.log('Raw Response:', data);
 
       return data;
     } catch (error) {
@@ -1394,6 +1420,29 @@ const MainScreen = () => {
     }
   };
 
+  const drawPolygon = () => {
+    if (markers.length >= 3) {
+      const coordinates = markers.map(marker => ({
+        latitude: marker.latitude,
+        longitude: marker.longitude,
+      }));
+      setPolygonCoordinates(coordinates);
+    } else {
+      setPolygonCoordinates([]);
+    }
+  };
+
+  const getPolygon = (coordinates) => {
+    if (coordinates.length >= 3) {
+      const polygonCoordinates = coordinates.map(coordinate => ({
+        latitude: coordinate[1],
+        longitude: coordinate[0], 
+      }));
+      setPolygonCoordinates(polygonCoordinates);
+    } else {
+      setPolygonCoordinates([]);
+    }
+  };
 
   const displayDataOnMap = (data) => {
     if (!data || !data.dac || !data.geom) {
@@ -1409,7 +1458,8 @@ const MainScreen = () => {
 
       // Check if the parsedGeom is a MultiPolygon and extract the coordinates
       if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
-        coordinates = parsedGeom.coordinates[0][0]; // Extract the first set of coordinates
+        coordinates = parsedGeom.coordinates[0][0];
+        getPolygon(coordinates);
       } else {
         throw new Error('Invalid geometry type or coordinates');
       }
@@ -1423,37 +1473,16 @@ const MainScreen = () => {
       return;
     }
     console.log(coordinates)
-    setCoordinates(coordinates);
-
     setMapPolygon(true);
-    drawPolygon(coordinates);
 
-  };
-
-  const drawPolygon = (coordinates) => {
-    if (!Array.isArray(coordinates) || coordinates.length === 0) {
-      return null; // Return null or a placeholder element
-    }
-
-    const polygonCoordinates = coordinates.map((coordinate) => ({
-      latitude: coordinate[1],
-      longitude: coordinate[0],
+    const polygonCoordinates = coordinates.map((coordinatePair) => ({
+      latitude: coordinatePair[1],
+      longitude: coordinatePair[0], 
     }));
 
-    const polygon = (
-      <Polygon
-        key="polygon"
-        coordinates={polygonCoordinates}
-        strokeWidth={5}
-        zIndex={5}
-        strokeColor="#FF0000"
-        strokeOpacity={0.8}
-        fillColor="#FF0000"
-        fillOpacity={0.35}
-      />
-    );
+    console.log('Polygon Coordinates:', polygonCoordinates);
 
-    return polygon;
+    setCoordinates(polygonCoordinates);
   };
 
 
@@ -1538,13 +1567,23 @@ const MainScreen = () => {
       setMarkedLocation(null);
     }
   };
+
   const handleMapReset = () => {
     setMapping(false);
     setBoundaryMarkers([]);
-    setSelectedLocations([]);
-    setMarkedLocation(null);
     setDacValue(null);
     setMapPolygon(false);
+    setMarkers([]);
+    setDrawingEnabled(false);
+    setMarkedLocation(null);
+    setSelectedLocations([]);
+    region = {
+      latitude: 28.6139,
+      longitude: 77.209,
+      latitudeDelta: 20,
+      longitudeDelta: 30,
+    }
+    mapViewRef.current.animateToRegion(region, 2000);
   };
 
   const handleBuildingCV = () => {
@@ -1563,7 +1602,6 @@ const MainScreen = () => {
   const getBuildingFootPrints = () => {
     console.log('getBuildingFootPrints');
     setLayer('satellite');
-
     const requestData = {
       latitude: selectedLocations.latitude,
       longitude: selectedLocations.longitude,
@@ -1586,9 +1624,28 @@ const MainScreen = () => {
       });
   };
 
-  const handleGetContour = () => {
+  const drawBuildingFootPrints = () => {
     if (selectedLocations.length > 0) {
-      setShapeType(Polygon);
+      setShapeType('Polygon');
+      console.log(selectedLocations);
+      setLayer('satellite');
+      setDrawingEnabled(true);
+      setShowDACPopup(false);
+
+      // Get the latitude and longitude of the last marked location
+      const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
+      const { latitude, longitude } = lastMarkedLocation;
+
+      // Set the region to zoom into the marked location
+      const region = {
+        latitude,
+        longitude,
+        latitudeDelta: 0.001,
+        longitudeDelta: 0.001,
+      };
+
+      // Update the map region
+      mapViewRef.current.animateToRegion(region, 1000); // 1000ms duration for the animation
     } else {
       Alert.alert(
         'No Marked Location',
@@ -1596,7 +1653,7 @@ const MainScreen = () => {
       );
     }
   };
-  
+
 
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -1624,8 +1681,9 @@ const MainScreen = () => {
           showsUserLocation={true}
           zoomEnabled={true}
           onLongPress={handleMapPress}
+
         >
-          {/* {mapPolygon && drawPolygon(coordinates)} */}
+
 
           {layer === 'osm' && (
             <WMSTile
@@ -1652,6 +1710,13 @@ const MainScreen = () => {
               epsgSpec={'EPSG:90031'}
             />
           )}
+          {layer === 'mapbox' && (
+            <UrlTile
+              urlTemplate={'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYWRuYWFuMDcwOSIsImEiOiJjbGo3azM4aDQwazlrM2ZxcHBvaHR4azBhIn0.y10hp3ht1p4vtHiS2_DdBw'}
+              zIndex={1}
+              epsgSpec={'EPSG:90031'}
+            />
+          )}
           {selectedLocations.map((location, index) => (
             <Marker
               key={index}
@@ -1663,26 +1728,34 @@ const MainScreen = () => {
     <Marker coordinate={selectedCoordinate} pinColor={markerColor} />
   )} */}
           {selectedCoordinate && (
-            <Marker coordinate={selectedCoordinate} pinColor={markerColor} />
+            <Marker coordinate={selectedCoordinate} pinColor={markerColor}>
+              <Callout>
+                <Text>Selected location: {selectedCoordinate.latitude.toFixed(4)}° N, {selectedCoordinate.longitude.toFixed(4)}° E</Text>
+              </Callout>
+            </Marker>
           )}
 
-          <View>
-            {shapeType == "Polygon" ?
-              loc.map(marker => (
-                <View key={Math.random()}>
-                  <Marker title={name} description={landuseClass} identifier={marker._id}
-                    key={Math.random()} coordinate={{ latitude: marker.latitude, longitude: marker.longitude }} />
-                  <Polygon key={Math.random()} coordinates={loc} strokeWidth={5} zIndex={5} />
-                </View>
-              )) : null}
-          </View>
 
+          {isDrawingEnabled && markers.map((marker, index) => (
+            <Marker
+              key={index}
+              coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+              pinColor={marker.color} // Corrected "marker. Color" to "marker.color"
+            />
+          ))}
 
+          {polygonCoordinates.length >= 3 && (
+            <Polygon
+              coordinates={polygonCoordinates}
+              strokeWidth={2}
+              fillColor="rgba(0, 0, 255,0.5)"
+              zIndex={5}
+              fillOpacity={0.35}
+            />
+          )}
         </MapView>
 
       </View>
-
-
 
       {loading && (
         <View style={styles.loadingContainer}>
@@ -1712,9 +1785,7 @@ const MainScreen = () => {
                 <Text style={styles.modalButtonText}>  Mark New Location</Text>
               </TouchableOpacity>
 
-              {/* <TouchableOpacity style={styles.modalButton} onPress={handleMark}>
-                <Text style={styles.modalButtonText}>New Dummy</Text>
-              </TouchableOpacity> */}
+
               <Text style={[styles.footerText, styles.designText]}>
                 *LongPress on map to mark a new location
               </Text>
@@ -1768,20 +1839,23 @@ const MainScreen = () => {
             <TouchableOpacity style={styles.closeIconContainer} onPress={() => setShowDACPopup(false)}>
               <Icon name="ios-close-circle" color="gray" size={30} />
             </TouchableOpacity>
-            <Text style={styles.DACPopupText}>Get your Digital Address Code (DAC) of the marked location</Text>
-            <TouchableOpacity style={styles.DACPopupButton} onPress={getBuildingFootPrints}>
-              <Text style={styles.DACPopupButtonText}>Mark Building Footprints</Text>
+            <TouchableOpacity style={styles.DACPopupButton} onPress={drawBuildingFootPrints}>
+              <Text style={styles.DACPopupButtonText}>Draw Building Footprints</Text>
             </TouchableOpacity>
+            <Text style={[styles.footerText, styles.designText]}>
+              *LongPress on map to draw boundary/Contour around building precisely
+            </Text>
+            <TouchableOpacity style={styles.DACPopupButton} onPress={getBuildingFootPrints}>
+              <Text style={styles.DACPopupButtonText}>Get Building Footprints</Text>
+            </TouchableOpacity>
+            <Text style={[styles.footerText, styles.designText]}>
+              *Generate boundary automatically
+            </Text>
           </View>
         </View>
       )}
 
-      {/* {<TouchableOpacity
-          style={styles.ContourIcon}
-          onPress={handleGetContour}>
-          <Icon name="layers" size={30} color="#333" />
-        </TouchableOpacity>  } */}
-
+      {/*    
       <View style={styles.footer}>
         <View style={styles.locationContainer}>
           <Text style={styles.markedLocationText}>
@@ -1802,6 +1876,26 @@ const MainScreen = () => {
             GPS Accuracy : 600 meters
           </Text>
 
+        </View>
+      </View> */}
+      <View style={styles.footer}>
+        <View style={styles.locationContainer}>
+          <Text style={styles.markedLocationText}>
+            Current Location: {mLat !== null ? mLat.toFixed(4) : 28.6139}° N,{' '}
+            {mLong !== null ? mLong.toFixed(4) : 77.209}° E
+          </Text>
+          {selectedLocations.length > 0 && (
+            <>
+              <View style={styles.line} />
+              <Text style={styles.markedLocationText}>
+                Marked Location: {selectedLocations[selectedLocations.length - 1].latitude.toFixed(4)}° N,{' '}
+                {selectedLocations[selectedLocations.length - 1].longitude.toFixed(4)}° E
+              </Text>
+            </>
+          )}
+          <View style={styles.line} />
+          {mapPolygon && <Text style={styles.markedLocationText}>Your DAC: {dacValue}</Text>}
+          <Text style={[styles.footerText, styles.designText]}>GPS Accuracy: 600 meters</Text>
         </View>
       </View>
 
@@ -1841,6 +1935,7 @@ const MainScreen = () => {
             }}
           />
         </View>
+        <Text style={styles.markedLocationText}>Satellite Maps</Text>
         <View style={styles.rowContainer}>
           <Dialog.Button
             label={
@@ -1849,7 +1944,7 @@ const MainScreen = () => {
                   source={require('../../../assets/images/satellite.png')}
                   style={styles.dialogImage}
                 />
-                <Text style={styles.buttonText}>Satellite</Text>
+                <Text style={styles.buttonText}>Google</Text>
               </>
             }
             onPress={() => {
@@ -1869,6 +1964,23 @@ const MainScreen = () => {
             }
             onPress={() => {
               setLayer('esri');
+              setShowMapOptions(false);
+            }}
+          />
+        </View>
+        <View style={styles.rowContainer}>
+          <Dialog.Button
+            label={
+              <>
+                <Image
+                  source={require('../../../assets/images/mapbox.png')}
+                  style={styles.dialogImage}
+                />
+                <Text style={styles.buttonText}>Mapbox</Text>
+              </>
+            }
+            onPress={() => {
+              setLayer('mapbox');
               setShowMapOptions(false);
             }}
           />
@@ -1986,7 +2098,7 @@ const styles = StyleSheet.create({
   },
   getDACIcon: {
     position: 'absolute',
-    top: 247,
+    top: 200,
     right: 12,
     marginLeft: 10,
     backgroundColor: '#fff',
@@ -2032,7 +2144,7 @@ const styles = StyleSheet.create({
   IconContainer2: {
     position: 'absolute',
 
-    top: 200,
+    top: 250,
     right: 12,
     marginLeft: 10,
     backgroundColor: '#fff',
@@ -2231,7 +2343,7 @@ const styles = StyleSheet.create({
   },
   getDACIcon: {
     position: 'absolute',
-    top: 250,
+    top: 200,
     right: 12,
     marginLeft: 10,
     backgroundColor: '#fff',
@@ -2244,6 +2356,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     //backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    marginBottom: 60,
   },
   DACPopup: {
     backgroundColor: '#FFF',
