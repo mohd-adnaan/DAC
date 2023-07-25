@@ -71,6 +71,7 @@ import SignOutScreen from '../SignOutScreen/SignOutScreen';
 import UserScreen from '../UserScreen/UserScreen';
 const Drawer = createDrawerNavigator();
 import Logo from '../../../assets/images/newlogoName.png';
+import Terms_PrivacyScreen from '../Terms_PrivacyScreen/Terms_PrivacyScreen';
 
 const DrawerScreen = () => {
   const navigation = useNavigation();
@@ -111,7 +112,9 @@ const DrawerScreen = () => {
       <Drawer.Screen name="User" component={UserScreen} options={{ headerShown: false }} />
       <Drawer.Screen name="Support" component={SupportScreen} options={{ headerShown: false }} />
       <Drawer.Screen name="About" component={AboutScreen} options={{ headerShown: false }} />
+      <Drawer.Screen name ="Terms&Conditions" component={Terms_PrivacyScreen} options={{ headerShown: false }}/>
       <Drawer.Screen name="SignOut" component={SignOutScreen} options={{ headerShown: false }} />
+      
     </Drawer.Navigator>
   );
 };

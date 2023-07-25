@@ -1225,8 +1225,12 @@ const MainScreen = () => {
   const [shapeType, setShapeType] = useState('')
   const [markers, setMarkers] = useState([]);
   const [polygonCoordinates, setPolygonCoordinates] = useState([]);
+  const [PolygonMarkers,setPolygonMarkers] = useState([]);
+  const [drawpolygonCoordinates, setDrawPolygonCoordinates] = useState([]);
   const [isDrawingEnabled, setDrawingEnabled] = useState(false);
   const [coordinates, setCoordinates] = useState([]);
+  const [DAC,setDAC]= useState(false);
+  
   useEffect(() => {
     requestCameraPermission();
     fetchDataAndDisplayOnMap();
@@ -1358,6 +1362,7 @@ const MainScreen = () => {
       setSelectedCoordinate({ latitude, longitude });
       setMarkedLocation({ latitude, longitude });
       const newColor = getRandomColor();
+      setDAC(true);
       setMarkerColor(newColor);
       setMapping(false);
       setShowMarkedLocationModal(true);
@@ -1395,6 +1400,7 @@ const MainScreen = () => {
           ...prevLocations,
           { latitude, longitude, color: markerColor },
         ]);
+        setDAC(true);
         saveLocationToBackend(latitude, longitude);
         fetchDataAndDisplayOnMap();
       }
@@ -1426,21 +1432,9 @@ const MainScreen = () => {
         latitude: marker.latitude,
         longitude: marker.longitude,
       }));
-      setPolygonCoordinates(coordinates);
+      setDrawPolygonCoordinates(coordinates);
     } else {
-      setPolygonCoordinates([]);
-    }
-  };
-
-  const getPolygon = (coordinates) => {
-    if (coordinates.length >= 3) {
-      const polygonCoordinates = coordinates.map(coordinate => ({
-        latitude: coordinate[1],
-        longitude: coordinate[0], 
-      }));
-      setPolygonCoordinates(polygonCoordinates);
-    } else {
-      setPolygonCoordinates([]);
+      setDrawPolygonCoordinates([]);
     }
   };
 
@@ -1456,7 +1450,7 @@ const MainScreen = () => {
     try {
       const parsedGeom = JSON.parse(data.geom);
 
-      // Check if the parsedGeom is a MultiPolygon and extract the coordinates
+  
       if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
         coordinates = parsedGeom.coordinates[0][0];
         getPolygon(coordinates);
@@ -1474,17 +1468,42 @@ const MainScreen = () => {
     }
     console.log(coordinates)
     setMapPolygon(true);
-
+   
     const polygonCoordinates = coordinates.map((coordinatePair) => ({
       latitude: coordinatePair[1],
       longitude: coordinatePair[0], 
     }));
+    const markerColor = getRandomColor();
+const newMarkers = polygonCoordinates.map(({ latitude, longitude }) => ({
+  latitude,
+  longitude,
+  color: markerColor,
+}));
+
+setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
 
     console.log('Polygon Coordinates:', polygonCoordinates);
-
-    setCoordinates(polygonCoordinates);
+    console.log('Poly length',polygonCoordinates.length);
+    console.log('PolygonMarkers:',PolygonMarkers);
+    setCoordinates(polygonCoordinates); 
   };
 
+
+  const getPolygon = (coordinates) => {
+    if (coordinates.length >= 3) {
+      const polygonCoordinate = coordinates.map(coordinate => ({
+        latitude: coordinate[1],
+        longitude: coordinate[0], 
+      }));
+      setPolygonCoordinates(polygonCoordinate);      
+    console.log('Polygon Coordinates:', polygonCoordinates);
+    console.log('Poly length',polygonCoordinates.length);
+    } else {
+      setPolygonCoordinates([]);      
+    console.log('Polygon Coordinates:', polygonCoordinates);
+    console.log('Poly length',polygonCoordinates.length);
+    }
+  };
 
   const saveLocationToBackend = async (latitude, longitude) => {
     const formattedLatitude = latitude.toFixed(4);
@@ -1499,8 +1518,8 @@ const MainScreen = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          latitude: 86.4851,//86.487591, //formattedLatitude,
-          longitude: 25.3422//25.319167// formattedLongitude
+          latitude:86.487591 ,//,86.4851 //formattedLatitude,
+          longitude: 25.319167// 25.3422,formattedLongitude
         })
       };
       const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
@@ -1577,6 +1596,8 @@ const MainScreen = () => {
     setDrawingEnabled(false);
     setMarkedLocation(null);
     setSelectedLocations([]);
+    setDrawPolygonCoordinates([]);
+    setDAC(false);
     region = {
       latitude: 28.6139,
       longitude: 77.209,
@@ -1681,10 +1702,7 @@ const MainScreen = () => {
           showsUserLocation={true}
           zoomEnabled={true}
           onLongPress={handleMapPress}
-
         >
-
-
           {layer === 'osm' && (
             <WMSTile
               urlTemplate={
@@ -1740,15 +1758,32 @@ const MainScreen = () => {
             <Marker
               key={index}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-              pinColor={marker.color} // Corrected "marker. Color" to "marker.color"
+              pinColor={marker.color}
             />
           ))}
-
-          {polygonCoordinates.length >= 3 && (
-            <Polygon
+          {DAC && PolygonMarkers.map((PolygonMarker, index) => (
+        <Marker
+          key={index}
+          coordinate={{ latitude: PolygonMarker.latitude, longitude: PolygonMarker.longitude }}
+          color={PolygonMarker.color} 
+        />
+      ))}
+          
+          { polygonCoordinates.length >= 3 &&
+          <Polygon
               coordinates={polygonCoordinates}
               strokeWidth={2}
               fillColor="rgba(0, 0, 255,0.5)"
+              zIndex={5}
+              fillOpacity={0.35}
+            />
+          }
+      
+          {drawpolygonCoordinates.length >= 3 && (
+            <Polygon
+              coordinates={drawpolygonCoordinates}
+              strokeWidth={2}
+              fillColor="rgba(255, 10, 10,0.5)"
               zIndex={5}
               fillOpacity={0.35}
             />
@@ -1855,29 +1890,7 @@ const MainScreen = () => {
         </View>
       )}
 
-      {/*    
-      <View style={styles.footer}>
-        <View style={styles.locationContainer}>
-          <Text style={styles.markedLocationText}>
-            Current Location: {mLat !== null ? mLat.toFixed(4) : 28.6139}° N,{' '}
-            {mLong !== null ? mLong.toFixed(4) : 77.209}° E
-          </Text>
-          {selectedLocations.length > 0 && (
-            <View style={styles.line} />
-          )}
-          {selectedLocations.map((location, index) => (
-            <Text key={index} style={styles.markedLocationText}>
-              Marked Location: {location.latitude.toFixed(4)}° N, {location.longitude.toFixed(4)}° E
-            </Text>
-          ))}
-          <View style={styles.line} />
-          {mapPolygon && <Text style={styles.markedLocationText}>Your DAC  :  {dacValue}</Text>}
-          <Text style={[styles.footerText, styles.designText]}>
-            GPS Accuracy : 600 meters
-          </Text>
-
-        </View>
-      </View> */}
+      
       <View style={styles.footer}>
         <View style={styles.locationContainer}>
           <Text style={styles.markedLocationText}>
@@ -1894,7 +1907,7 @@ const MainScreen = () => {
             </>
           )}
           <View style={styles.line} />
-          {mapPolygon && <Text style={styles.markedLocationText}>Your DAC: {dacValue}</Text>}
+          {DAC && <Text style={styles.markedLocationText}>Your DAC: {dacValue}</Text>}
           <Text style={[styles.footerText, styles.designText]}>GPS Accuracy: 600 meters</Text>
         </View>
       </View>
