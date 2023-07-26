@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
-
 import Icon from 'react-native-vector-icons/Ionicons';
 import Hyperlink from 'react-native-hyperlink';
 
@@ -11,33 +9,34 @@ const AboutScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.closeIconContainer}>
+        <View style={styles.header}>
           <Icon
-            name="ios-close-circle"
+            name="ios-arrow-back"
             color="gray"
-            size={50}
+            size={30}
             onPress={() => navigation.goBack()}
           />
+          <Text style={styles.heading}>About the DAC App</Text>
         </View>
         <View style={styles.contentContainer}>
           <View style={styles.imageContainer}>
             <Image source={aboutImage} style={styles.image} resizeMode="contain" />
           </View>
-          <View style={styles.header}>
-            <Text style={styles.heading}>About the DAC App</Text>
-          </View>
           <View style={styles.description}>
             <Text style={styles.descriptionText}>
-              The app allows users to sign in, access their location via GPS, mark points on a map, and retrieve unique
-              Digital Address Codes (DACs) based on latitude and longitude coordinates and update it by marking different position on Indian Map.
+              The DAC app allows users to sign in, access their location via GPS, mark points on a map, and retrieve unique
+              Digital Address Codes (DACs) based on latitude and longitude coordinates.
             </Text>
             <Text style={styles.descriptionText}>
               It is built using React Native for cross-platform functionality, PHP for server connectivity, and PostgreSQL as
               the database.
             </Text>
             <Text style={styles.descriptionText}>
-            The DAC app is developed by NRSC-North, ISRO.
+              The DAC app is developed by NRSC-North, ISRO.
             </Text>
+            <Hyperlink linkDefault={true} linkStyle={styles.link}>
+              <Text style={styles.linkText}>For more information, visit: www.nrsc.gov.in</Text>
+            </Hyperlink>
           </View>
         </View>
       </ScrollView>
@@ -56,11 +55,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 50,
   },
-  closeIconContainer: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  heading: {
+    flex: 1,
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: 'black',
+    textAlign: 'center',
   },
   contentContainer: {
     alignItems: 'center',
@@ -73,28 +79,27 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
   },
-  header: {
-    alignItems: 'center',
-    paddingTop: 5,
-  },
-  heading: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: 'black',
-  },
   description: {
-    padding: 10,
-    marginVertical: 10,
-    marginHorizontal: 10,
+    padding: 20,
     borderRadius: 10,
     backgroundColor: '#9AC5F4',
+    width: '90%',
+    marginBottom: 20,
   },
   descriptionText: {
     fontSize: 16,
     color: '#000',
     textAlign: 'justify',
-    paddingTop: 5,
     marginBottom: 10,
+  },
+  link: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+  },
+  linkText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 10,
   },
 });
 

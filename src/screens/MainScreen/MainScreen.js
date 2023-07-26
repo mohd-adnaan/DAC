@@ -1,3 +1,4 @@
+
 // import React, { useEffect, useState, useRef } from 'react';
 // import {
 //   Dimensions,
@@ -67,22 +68,27 @@
 //   const [footerText, setFooterText] = useState('');
 //   const [showDACPopup, setShowDACPopup] = useState(false);
 //   const [loading, setLoading] = useState(false);
-//   const [coordinates, setCoordinates] = useState([]);
 //   const [dacValue, setDacValue] = useState('');
-//   const[mapPolygon, setMapPolygon] = useState(false); 
-
+//   const [mapPolygon, setMapPolygon] = useState(false);
+//   const [shapeType, setShapeType] = useState('')
+//   const [markers, setMarkers] = useState([]);
+//   const [polygonCoordinates, setPolygonCoordinates] = useState([]);
+//   const [PolygonMarkers,setPolygonMarkers] = useState([]);
+//   const [drawpolygonCoordinates, setDrawPolygonCoordinates] = useState([]);
+//   const [isDrawingEnabled, setDrawingEnabled] = useState(false);
+//   const [coordinates, setCoordinates] = useState([]);
+//   const [DAC,setDAC]= useState(false);
+  
 //   useEffect(() => {
 //     requestCameraPermission();
+//     fetchDataAndDisplayOnMap();
 //   }, []);
 //   useEffect(() => {
 //     requestPermission();
 //   }, []);
 //   useEffect(() => {
-//     if (mapPolygon) {
-//       drawPolygon(coordinates);
-//     }
-//   }, [mapPolygon]);
-
+//     drawPolygon();
+//   }, [markers]);
 //   const requestCameraPermission = async () => {
 //     try {
 //       const granted = await PermissionsAndroid.request(
@@ -134,11 +140,13 @@
 //       const permission = await PermissionsAndroid.check(
 //         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
 //       );
+
 //       if (!permission) {
 //         await requestStoragePermission();
 //         return;
 //       }
-//       const filePath = `${RNFS.PicturesDirectoryPath}/screenshot.png`; 
+
+//       const filePath = `${RNFS.PicturesDirectoryPath}/screenshot.png`; // File path in the Pictures directory
 //       await RNFS.copyFile(imageUri, filePath);
 //       console.log('Screenshot saved to:', filePath);
 //       Alert.alert('Screenshot saved to:', filePath);
@@ -147,8 +155,10 @@
 //     }
 //   };
 
+
+
 //   const getRandomColor = () => {
-//     const colors = ['blue', 'green', 'purple', 'orange', 'red'];
+//     const colors = ['#4285F4', '#34A853', '#FBBC05', '#EA4335',];
 //     const randomIndex = Math.floor(Math.random() * colors.length);
 //     return colors[randomIndex];
 //   };
@@ -200,13 +210,36 @@
 //       setSelectedCoordinate({ latitude, longitude });
 //       setMarkedLocation({ latitude, longitude });
 //       const newColor = getRandomColor();
+//       setDAC(true);
 //       setMarkerColor(newColor);
 //       setMapping(false);
 //       setShowMarkedLocationModal(true);
 //     }
 //   };
-//   const handleMapPress = event => {
 
+
+//   const handleMapPress = event => {
+//     if (isDrawingEnabled) {
+//       if (mapping && markers.length < 16) {
+//         const { latitude, longitude } = event.nativeEvent.coordinate;
+//         const markerColor = getRandomColor();
+//         setSelectedLocations(prevLocations => [
+//           ...prevLocations,
+//           { latitude, longitude, color: markerColor },
+//         ]);
+//         setMarkers(prevMarkers => [
+//           ...prevMarkers,
+//           { latitude, longitude, color: markerColor },
+//         ]);
+//         saveLocationToBackend(latitude, longitude);
+//         fetchDataAndDisplayOnMap();
+//       } else if (mapping && markers.length === 16) {
+//         Alert.alert(
+//           'Maximum Positions Reached',
+//           'You have marked the maximum allowed positions (16).',
+//         );
+//       }
+//     } else {
 //       setSelectedLocations([]);
 //       if (mapping) {
 //         const { latitude, longitude } = event.nativeEvent.coordinate;
@@ -215,116 +248,135 @@
 //           ...prevLocations,
 //           { latitude, longitude, color: markerColor },
 //         ]);
+//         setDAC(true);
 //         saveLocationToBackend(latitude, longitude);
 //         fetchDataAndDisplayOnMap();
 //       }
-//     };
-//     const fetchDataAndDisplayOnMap = async () => {
-//       const data = await fetchDataFromBackend();
-//       displayDataOnMap(data);
-//     };
-//     const fetchDataFromBackend = async () => {
-//       try {
-//         const response = await fetch('http://192.168.43.22/Integrate/getDAC.php');
-//         const data = await response.json(); // Parse the JSON response directly
+//     }
+//   };
 
-//         console.log('Raw Response:', data); // Log the parsed JSON data for inspection
+//   const fetchDataAndDisplayOnMap = async () => {
+//     const data = await fetchDataFromBackend();
+//     displayDataOnMap(data);
+//   };
 
-//         return data;
-//       } catch (error) {
-//         console.error('Error fetching data:', error);
-//         return null;
-//       }
-//     };
+//   const fetchDataFromBackend = async () => {
+//     try {
+//       const response = await fetch('http://192.168.43.22/Integrate/getDAC.php');
+//       const data = await response.json();
 
+//       console.log('Raw Response:', data);
 
-//     const displayDataOnMap = (data) => {
-//       if (!data || !data.dac || !data.geom) {
-//         console.error('Invalid data received from backend');
-//         return;
-//       }
-//       setDacValue(data.dac);
+//       return data;
+//     } catch (error) {
+//       console.error('Error fetching data:', error);
+//       return null;
+//     }
+//   };
+
+//   const drawPolygon = () => {
+//     if (markers.length >= 3) {
+//       const coordinates = markers.map(marker => ({
+//         latitude: marker.latitude,
+//         longitude: marker.longitude,
+//       }));
+//       setDrawPolygonCoordinates(coordinates);
+//     } else {
+//       setDrawPolygonCoordinates([]);
+//     }
+//   };
+
+//   const displayDataOnMap = (data) => {
+//     if (!data || !data.dac || !data.geom) {
+//       console.error('Invalid data received from backend');
+//       return;
+//     }
+//     setDacValue(data.dac);
 //     //  Alert.alert('DAC: ' + data.dac);
 
-//       let coordinates;
-//       try {
-//         const parsedGeom = JSON.parse(data.geom);
+//     let coordinates;
+//     try {
+//       const parsedGeom = JSON.parse(data.geom);
 
-//         // Check if the parsedGeom is a MultiPolygon and extract the coordinates
-//         if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
-//           coordinates = parsedGeom.coordinates[0][0]; // Extract the first set of coordinates
-//         } else {
-//           throw new Error('Invalid geometry type or coordinates');
-//         }
-//       } catch (error) {
-//         console.error('Error parsing coordinates:', error);
-//         return;
+  
+//       if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
+//         coordinates = parsedGeom.coordinates[0][0];
+//         getPolygon(coordinates);
+//       } else {
+//         throw new Error('Invalid geometry type or coordinates');
 //       }
+//     } catch (error) {
+//       console.error('Error parsing coordinates:', error);
+//       return;
+//     }
 
-//       if (!Array.isArray(coordinates) || coordinates.length === 0) {
-//         console.error('Invalid coordinates received from backend');
-//         return;
-//       }
-//       console.log(coordinates)
-//       setCoordinates(coordinates);
+//     if (!Array.isArray(coordinates) || coordinates.length === 0) {
+//       console.error('Invalid coordinates received from backend');
+//       return;
+//     }
+//     console.log(coordinates)
+//     setMapPolygon(true);
+   
+//     const polygonCoordinates = coordinates.map((coordinatePair) => ({
+//       latitude: coordinatePair[1],
+//       longitude: coordinatePair[0], 
+//     }));
+//     const markerColor = getRandomColor();
+// const newMarkers = polygonCoordinates.map(({ latitude, longitude }) => ({
+//   latitude,
+//   longitude,
+//   color: markerColor,
+// }));
 
-//       setMapPolygon(true);
-//       drawPolygon(coordinates);
+// setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
 
-//     };
+//     console.log('Polygon Coordinates:', polygonCoordinates);
+//     console.log('Poly length',polygonCoordinates.length);
+//     console.log('PolygonMarkers:',PolygonMarkers);
+//     setCoordinates(polygonCoordinates); 
+//   };
 
 
-//     const drawPolygon = (coordinates) => {
-//       if (!Array.isArray(coordinates) || coordinates.length === 0) {
-//         return null; 
-//       }
-
-//       const polygonCoordinates = coordinates.map((coordinate) => ({
+//   const getPolygon = (coordinates) => {
+//     if (coordinates.length >= 3) {
+//       const polygonCoordinate = coordinates.map(coordinate => ({
 //         latitude: coordinate[1],
-//         longitude: coordinate[0],
+//         longitude: coordinate[0], 
 //       }));
+//       setPolygonCoordinates(polygonCoordinate);      
+//     console.log('Polygon Coordinates:', polygonCoordinates);
+//     console.log('Poly length',polygonCoordinates.length);
+//     } else {
+//       setPolygonCoordinates([]);      
+//     console.log('Polygon Coordinates:', polygonCoordinates);
+//     console.log('Poly length',polygonCoordinates.length);
+//     }
+//   };
 
-//       const polygon = (
-//         <Polygon
-//           key="polygon"
-//           coordinates={polygonCoordinates}
-//           strokeWidth={5}  
-//           zIndex={5}
-//           strokeColor="#FF0000"
-//           strokeOpacity={0.8}
-//           fillColor="#FF0000"
-//           fillOpacity={0.35}
-//         />
-//       );
+//   const saveLocationToBackend = async (latitude, longitude) => {
+//     const formattedLatitude = latitude.toFixed(4);
+//     const formattedLongitude = longitude.toFixed(4);
 
-//       return polygon;
-//     };
-
-
-//     const saveLocationToBackend = async (latitude, longitude) => {
-//       const formattedLatitude = latitude.toFixed(4);
-//       const formattedLongitude = longitude.toFixed(4);
-
-//       console.log(formattedLatitude, formattedLongitude);
-//       try {
-//         const requestOptions = {
-//           method: 'POST',
-//           headers: {
-//             'Accept': 'application/json',
-//             'Content-Type': 'application/json'
-//           },
-//           body: JSON.stringify({
-//             latitude:formattedLatitude,//86.487591
-//             longitude:formattedLongitude//86.487591
-//           })
-//         };
-//         const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
-//         const responseData = await response.json();
-//         console.log('Location data saved:', responseData);
-//       } catch (error) {
-//         console.error('Error: Not Passed', error);
-//       }
-//     };
+//     console.log(formattedLatitude, formattedLongitude);
+//     try {
+//       const requestOptions = {
+//         method: 'POST',
+//         headers: {
+//           'Accept': 'application/json',
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify({
+//           latitude:86.487591 ,//,86.4851 //formattedLatitude,86.48406,
+//           longitude: 25.319167// 25.3422,formattedLongitude,25.34389
+//         })
+//       };
+//       const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
+//       const responseData = await response.json();
+//       console.log('Location data saved:', responseData);
+//     } catch (error) {
+//       console.error('Error: Not Passed', error);
+//     }
+//   };
 
 //   const handleSupportPress = () => {
 //     navigation.navigate('Support');
@@ -369,7 +421,6 @@
 //     }, 2000);
 
 //   };
-
 //   const handleUpdateMarkedLocation = () => {
 //     closeModal();
 //     setMapping(true);
@@ -381,24 +432,27 @@
 //     if (markedLocation) {
 //       setBoundaryMarkers(prevMarkers => [...prevMarkers, markedLocation]);
 //       setMarkedLocation(null);
-
-//       const zoomedRegion = {
-//         latitude: 86.487591,
-//         longitude: 86.487591,
-//         latitudeDelta: 0.1,
-//         longitudeDelta: 0.1,
-//       };
-//       mapViewRef.current?.animateToRegion(zoomedRegion, 1000);
 //     }
 //   };
 
 //   const handleMapReset = () => {
 //     setMapping(false);
 //     setBoundaryMarkers([]);
-//     setSelectedLocations([]);
-//     setMarkedLocation(null);
 //     setDacValue(null);
 //     setMapPolygon(false);
+//     setMarkers([]);
+//     setDrawingEnabled(false);
+//     setMarkedLocation(null);
+//     setSelectedLocations([]);
+//     setDrawPolygonCoordinates([]);
+//     setDAC(false);
+//     region = {
+//       latitude: 28.6139,
+//       longitude: 77.209,
+//       latitudeDelta: 20,
+//       longitudeDelta: 30,
+//     }
+//     mapViewRef.current.animateToRegion(region, 2000);
 //   };
 
 //   const handleBuildingCV = () => {
@@ -417,12 +471,10 @@
 //   const getBuildingFootPrints = () => {
 //     console.log('getBuildingFootPrints');
 //     setLayer('satellite');
-
 //     const requestData = {
 //       latitude: selectedLocations.latitude,
 //       longitude: selectedLocations.longitude,
 //     };
-
 //     fetch('http://192.168.43.22:5000/members', {
 //       method: 'POST',
 //       headers: {
@@ -433,40 +485,40 @@
 //       .then((response) => response.json())
 //       .then((data) => {
 //         console.log('Response from backend:', data);
-//         setShowDACPopup(false); 
+//         setShowDACPopup(false);
 //       })
 //       .catch((error) => {
 //         console.log('Error sending data to backend:', error);
-//         setShowDACPopup(false); 
+//         setShowDACPopup(false);
 //       });
 //   };
 
+//   const drawBuildingFootPrints = () => {
+//     if (selectedLocations.length > 0) {
+//       setShapeType('Polygon');
+//       console.log(selectedLocations);
+//       setLayer('satellite');
+//       setDrawingEnabled(true);
+//       setShowDACPopup(false);
 
-//   const handleGetContour = () => {
-//     if (markedLocation) {
-//       const requestData = {
-//         latitude: markedLocation.latitude,
-//         longitude: markedLocation.longitude,
+//       // Get the latitude and longitude of the last marked location
+//       const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
+//       const { latitude, longitude } = lastMarkedLocation;
+
+//       // Set the region to zoom into the marked location
+//       const region = {
+//         latitude,
+//         longitude,
+//         latitudeDelta: 0.001,
+//         longitudeDelta: 0.001,
 //       };
 
-//       fetch('http://192.168.43.22:5000/members', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify(requestData),
-//       })
-//         .then((response) => response.json())
-//         .then((data) => {
-//           console.log('Response from backend:', data);
-//         })
-//         .catch((error) => {
-//           console.log('Error sending data to backend:', error);
-//         });
+//       // Update the map region
+//       mapViewRef.current.animateToRegion(region, 1000); // 1000ms duration for the animation
 //     } else {
 //       Alert.alert(
 //         'No Marked Location',
-//         'You have not marked any location on the Indian Map. Kindly mark a location to get the respective Contour detection around marked location.',
+//         'You have not marked any location on the Indian Map. Kindly mark a location to get the respective Contour detection around the marked location.',
 //       );
 //     }
 //   };
@@ -499,13 +551,6 @@
 //           zoomEnabled={true}
 //           onLongPress={handleMapPress}
 //         >
-//           {mapPolygon && (
-//   <>
-//     {drawPolygon(coordinates)}
-//     {console.log(coordinates)}
-//   </>
-// )}
-
 //           {layer === 'osm' && (
 //             <WMSTile
 //               urlTemplate={
@@ -524,9 +569,16 @@
 //           )}
 //           {layer === 'esri' && (
 //             <UrlTile
-//              // urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'}
-//             // urlTemplate = {'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+//               // urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'}
+//               // urlTemplate = {'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
 //               urlTemplate={'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+//               zIndex={1}
+//               epsgSpec={'EPSG:90031'}
+//             />
+//           )}
+//           {layer === 'mapbox' && (
+//             <UrlTile
+//               urlTemplate={'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYWRuYWFuMDcwOSIsImEiOiJjbGo3azM4aDQwazlrM2ZxcHBvaHR4azBhIn0.y10hp3ht1p4vtHiS2_DdBw'}
 //               zIndex={1}
 //               epsgSpec={'EPSG:90031'}
 //             />
@@ -542,7 +594,47 @@
 //     <Marker coordinate={selectedCoordinate} pinColor={markerColor} />
 //   )} */}
 //           {selectedCoordinate && (
-//             <Marker coordinate={selectedCoordinate} pinColor={markerColor} />
+//             <Marker coordinate={selectedCoordinate} pinColor={markerColor}>
+//               <Callout>
+//                 <Text>Selected location: {selectedCoordinate.latitude.toFixed(4)}° N, {selectedCoordinate.longitude.toFixed(4)}° E</Text>
+//               </Callout>
+//             </Marker>
+//           )}
+
+
+//           {isDrawingEnabled && markers.map((marker, index) => (
+//             <Marker
+//               key={index}
+//               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+//               pinColor={marker.color}
+//             />
+//           ))}
+//           {DAC && PolygonMarkers.map((PolygonMarker, index) => (
+//         <Marker
+//           key={index}
+//           coordinate={{ latitude: PolygonMarker.latitude, longitude: PolygonMarker.longitude }}
+//           color={PolygonMarker.color} 
+//         />
+//       ))}
+          
+//           { polygonCoordinates.length >= 3 &&
+//           <Polygon
+//               coordinates={polygonCoordinates}
+//               strokeWidth={2}
+//               fillColor="rgba(0, 0, 255,0.5)"
+//               zIndex={5}
+//               fillOpacity={0.35}
+//             />
+//           }
+      
+//           {drawpolygonCoordinates.length >= 3 && (
+//             <Polygon
+//               coordinates={drawpolygonCoordinates}
+//               strokeWidth={2}
+//               fillColor="rgba(255, 10, 10,0.5)"
+//               zIndex={5}
+//               fillOpacity={0.35}
+//             />
 //           )}
 //         </MapView>
 
@@ -576,9 +668,7 @@
 //                 <Text style={styles.modalButtonText}>  Mark New Location</Text>
 //               </TouchableOpacity>
 
-//               {/* <TouchableOpacity style={styles.modalButton} onPress={handleMark}>
-//                 <Text style={styles.modalButtonText}>New Dummy</Text>
-//               </TouchableOpacity> */}
+
 //               <Text style={[styles.footerText, styles.designText]}>
 //                 *LongPress on map to mark a new location
 //               </Text>
@@ -620,10 +710,10 @@
 //       </TouchableOpacity>
 
 //       <TouchableOpacity
-//           style={styles.getDACIcon}
-//           onPress={handleBuildingCV}>
-//           <Icon name="ios-analytics" size={30} color="#333" />
-//         </TouchableOpacity> 
+//         style={styles.getDACIcon}
+//         onPress={handleBuildingCV}>
+//         <Icon name="ios-analytics" size={30} color="#333" />
+//       </TouchableOpacity>
 
 
 //       {showDACPopup && (
@@ -632,20 +722,23 @@
 //             <TouchableOpacity style={styles.closeIconContainer} onPress={() => setShowDACPopup(false)}>
 //               <Icon name="ios-close-circle" color="gray" size={30} />
 //             </TouchableOpacity>
-//             <Text style={styles.DACPopupText}>Get your Digital Address Code (DAC) of the marked location</Text>
-//             <TouchableOpacity style={styles.DACPopupButton} onPress={getBuildingFootPrints}>
-//               <Text style={styles.DACPopupButtonText}>Mark Building Footprints</Text>
+//             <TouchableOpacity style={styles.DACPopupButton} onPress={drawBuildingFootPrints}>
+//               <Text style={styles.DACPopupButtonText}>Draw Building Footprints</Text>
 //             </TouchableOpacity>
+//             <Text style={[styles.footerText, styles.designText]}>
+//               *LongPress on map to draw boundary/Contour around building precisely
+//             </Text>
+//             <TouchableOpacity style={styles.DACPopupButton} onPress={getBuildingFootPrints}>
+//               <Text style={styles.DACPopupButtonText}>Get Building Footprints</Text>
+//             </TouchableOpacity>
+//             <Text style={[styles.footerText, styles.designText]}>
+//               *Generate boundary automatically
+//             </Text>
 //           </View>
 //         </View>
 //       )}
 
-//       {/* <TouchableOpacity
-//           style={styles.ContourIcon}
-//           onPress={handleGetContour}>
-//           <Icon name="ios-analytics" size={30} color="#333" />
-//         </TouchableOpacity>  */}
-
+      
 //       <View style={styles.footer}>
 //         <View style={styles.locationContainer}>
 //           <Text style={styles.markedLocationText}>
@@ -653,94 +746,110 @@
 //             {mLong !== null ? mLong.toFixed(4) : 77.209}° E
 //           </Text>
 //           {selectedLocations.length > 0 && (
-//   <View style={styles.line} />
-// )}
-//           {selectedLocations.map((location,index) => (
-//       <Text key={index} style={styles.markedLocationText}>
-//         Marked Location: {location.latitude.toFixed(4)}° N, {location.longitude.toFixed(4)}° E
-//       </Text>
-//     ))}
-//     <View style={styles.line} />
-//     {mapPolygon && <Text style={styles.markedLocationText}>Your DAC  :  {dacValue}</Text>}
-//           <Text style={[styles.footerText, styles.designText]}>
-//             GPS Accuracy : 600 meters
-//           </Text>
-
+//             <>
+//               <View style={styles.line} />
+//               <Text style={styles.markedLocationText}>
+//                 Marked Location: {selectedLocations[selectedLocations.length - 1].latitude.toFixed(4)}° N,{' '}
+//                 {selectedLocations[selectedLocations.length - 1].longitude.toFixed(4)}° E
+//               </Text>
+//             </>
+//           )}
+//           <View style={styles.line} />
+//           {DAC && <Text style={styles.markedLocationText}>Your DAC: {dacValue}</Text>}
+//           <Text style={[styles.footerText, styles.designText]}>GPS Accuracy: 600 meters</Text>
 //         </View>
 //       </View>
 
 
 //       <Dialog.Container visible={showMapOptions}>
-//   <Dialog.Title>Map Options</Dialog.Title>
-//   <Dialog.Description>Choose a map option:</Dialog.Description>
-//   <View style={styles.rowContainer}>
-//     <Dialog.Button
-//       label={
-//         <>
-//           <Image
-//             source={require('../../../assets/images/default.png')}
-//             style={styles.dialogImage}
+//         <Dialog.Title>Map Options</Dialog.Title>
+//         <Dialog.Description>Choose a map option:</Dialog.Description>
+//         <View style={styles.rowContainer}>
+//           <Dialog.Button
+//             label={
+//               <>
+//                 <Image
+//                   source={require('../../../assets/images/default.png')}
+//                   style={styles.dialogImage}
+//                 />
+//                 <Text style={styles.buttonText}>OSM</Text>
+//               </>
+//             }
+//             onPress={() => {
+//               setLayer('bhuvan');
+//               setShowMapOptions(false);
+//             }}
 //           />
-//           <Text style={styles.buttonText}>OSM</Text>
-//         </>
-//       }
-//       onPress={() => {
-//         setLayer('bhuvan');
-//         setShowMapOptions(false);
-//       }}
-//     />
-//     <Dialog.Button
-//       label={
-//         <>
-//           <Image
-//             source={require('../../../assets/images/osm.png')}
-//             style={styles.dialogImage}
+//           <Dialog.Button
+//             label={
+//               <>
+//                 <Image
+//                   source={require('../../../assets/images/osm.png')}
+//                   style={styles.dialogImage}
+//                 />
+//                 <Text style={styles.buttonText}>Bhuvan</Text>
+//               </>
+//             }
+//             onPress={() => {
+//               setLayer('osm');
+//               setShowMapOptions(false);
+//             }}
 //           />
-//           <Text style={styles.buttonText}>Bhuvan</Text>
-//         </>
-//       }
-//       onPress={() => {
-//         setLayer('osm');
-//         setShowMapOptions(false);
-//       }}
-//     />
-//   </View>
-//   <View style={styles.rowContainer}>
-//     <Dialog.Button
-//       label={
-//         <>
-//           <Image
-//             source={require('../../../assets/images/satellite.png')}
-//             style={styles.dialogImage}
+//         </View>
+//         <Text style={styles.markedLocationText}>Satellite Maps</Text>
+//         <View style={styles.rowContainer}>
+//           <Dialog.Button
+//             label={
+//               <>
+//                 <Image
+//                   source={require('../../../assets/images/satellite.png')}
+//                   style={styles.dialogImage}
+//                 />
+//                 <Text style={styles.buttonText}>Google</Text>
+//               </>
+//             }
+//             onPress={() => {
+//               setLayer('satellite');
+//               setShowMapOptions(false);
+//             }}
 //           />
-//           <Text style={styles.buttonText}>Satellite</Text>
-//         </>
-//       }
-//       onPress={() => {
-//         setLayer('satellite');
-//         setShowMapOptions(false);
-//       }}
-//     />
-//     <Dialog.Button
-//       label={
-//         <>
-//           <Image
-//             source={require('../../../assets/images/esri_satellite.png')}
-//             style={styles.dialogImage}
+//           <Dialog.Button
+//             label={
+//               <>
+//                 <Image
+//                   source={require('../../../assets/images/esri_satellite.png')}
+//                   style={styles.dialogImage}
+//                 />
+//                 <Text style={styles.buttonText}>Esri</Text>
+//               </>
+//             }
+//             onPress={() => {
+//               setLayer('esri');
+//               setShowMapOptions(false);
+//             }}
 //           />
-//           <Text style={styles.buttonText}>Esri</Text>
-//         </>
-//       }
-//       onPress={() => {
-//         setLayer('esri');
-//         setShowMapOptions(false);
-//       }}
-//     />
-//   </View>
-//   <TouchableOpacity style={styles.closeIconContainer} onPress={closePreview}>
-//     <Icon name="close" size={40} color="black" />
-//   </TouchableOpacity>
-// </Dialog.Container>
+//         </View>
+//         <View style={styles.rowContainer}>
+//           <Dialog.Button
+//             label={
+//               <>
+//                 <Image
+//                   source={require('../../../assets/images/mapbox.png')}
+//                   style={styles.dialogImage}
+//                 />
+//                 <Text style={styles.buttonText}>Mapbox</Text>
+//               </>
+//             }
+//             onPress={() => {
+//               setLayer('mapbox');
+//               setShowMapOptions(false);
+//             }}
+//           />
+//         </View>
+//         <TouchableOpacity style={styles.closeIconContainer} onPress={closePreview}>
+//           <Icon name="close" size={40} color="black" />
+//         </TouchableOpacity>
+//       </Dialog.Container>
 
 
 //       <Dialog.Container visible={showAlert}>
@@ -850,7 +959,7 @@
 //   },
 //   getDACIcon: {
 //     position: 'absolute',
-//     top: 247,
+//     top: 200,
 //     right: 12,
 //     marginLeft: 10,
 //     backgroundColor: '#fff',
@@ -896,7 +1005,7 @@
 //   IconContainer2: {
 //     position: 'absolute',
 
-//     top: 200,
+//     top: 250,
 //     right: 12,
 //     marginLeft: 10,
 //     backgroundColor: '#fff',
@@ -955,7 +1064,7 @@
 //   },
 //   markedLocationText: {
 //     fontSize: 14,
-//    // fontWeight: 'bold',
+//     // fontWeight: 'bold',
 //     marginBottom: 10,
 
 //   },
@@ -1095,7 +1204,7 @@
 //   },
 //   getDACIcon: {
 //     position: 'absolute',
-//     top: 250,
+//     top: 200,
 //     right: 12,
 //     marginLeft: 10,
 //     backgroundColor: '#fff',
@@ -1108,6 +1217,7 @@
 //     justifyContent: 'center',
 //     alignItems: 'center',
 //     //backgroundColor: 'rgba(0, 0, 0, 0.5)',
+//     marginBottom: 60,
 //   },
 //   DACPopup: {
 //     backgroundColor: '#FFF',
@@ -1143,12 +1253,16 @@
 //     fontWeight: 'bold',
 //     textAlign: 'center',
 //   },
+
 // });
 
 // export default MainScreen;
 
 
-//-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+// //------------------------------------------------------------------------------  ----------------------------------------------------------------
+
 
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -1162,11 +1276,13 @@ import {
   Image,
   Alert,
   TextInput,
-  Animated,
   BackHandler,
   Modal,
   Button,
   ActivityIndicator,
+  PanResponder,
+  Animated,
+  Easing,
 } from 'react-native';
 import MapView, {
   UrlTile,
@@ -1230,7 +1346,8 @@ const MainScreen = () => {
   const [isDrawingEnabled, setDrawingEnabled] = useState(false);
   const [coordinates, setCoordinates] = useState([]);
   const [DAC,setDAC]= useState(false);
-  
+  const [footerPosition, setFooterPosition] = useState(new Animated.Value(0));
+  const [footerVisible, setFooterVisible] = useState(true);
   useEffect(() => {
     requestCameraPermission();
     fetchDataAndDisplayOnMap();
@@ -1518,8 +1635,8 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          latitude:86.487591 ,//,86.4851 //formattedLatitude,
-          longitude: 25.319167// 25.3422,formattedLongitude
+          latitude:86.487591 ,//,86.4851 //formattedLatitude,86.48406,
+          longitude: 25.319167// 25.3422,formattedLongitude,25.34389
         })
       };
       const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
@@ -1605,6 +1722,7 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
       longitudeDelta: 30,
     }
     mapViewRef.current.animateToRegion(region, 2000);
+    setFooterVisible(prevState => !prevState);
   };
 
   const handleBuildingCV = () => {
@@ -1674,7 +1792,48 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
       );
     }
   };
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        const { dy } = gestureState;
+        if (dy > 0) {
+          setFooterPosition(new Animated.Value(dy));
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const { dy } = gestureState;
+        if (dy > 100) {
+          // User dragged the footer down more than 100 units, close the footer
+          Animated.timing(footerPosition, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: false,
+          }).start();
+        } else {
+          // User didn't drag the footer down enough, snap back to the original position
+          Animated.timing(footerPosition, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
+  const toggleFooter = () => {
+    setFooterVisible(prevState => !prevState);
+  };
+  useEffect(() => {
+    // Animate the footer position whenever footerVisible changes
+    Animated.timing(footerPosition, {
+      toValue: footerVisible ? 0 : windowHeight - 60,
+      duration: 200, // Adjust the duration as needed
+      easing: Easing.ease, // Add an easing function for smoother animation (Optional)
+      useNativeDriver: false,
+    }).start();
+  }, [footerVisible, windowHeight, footerPosition]);
 
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -1890,27 +2049,32 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
         </View>
       )}
 
-      
       <View style={styles.footer}>
         <View style={styles.locationContainer}>
-          <Text style={styles.markedLocationText}>
-            Current Location: {mLat !== null ? mLat.toFixed(4) : 28.6139}° N,{' '}
-            {mLong !== null ? mLong.toFixed(4) : 77.209}° E
-          </Text>
-          {selectedLocations.length > 0 && (
-            <>
-              <View style={styles.line} />
-              <Text style={styles.markedLocationText}>
-                Marked Location: {selectedLocations[selectedLocations.length - 1].latitude.toFixed(4)}° N,{' '}
-                {selectedLocations[selectedLocations.length - 1].longitude.toFixed(4)}° E
-              </Text>
-            </>
-          )}
-          <View style={styles.line} />
-          {DAC && <Text style={styles.markedLocationText}>Your DAC: {dacValue}</Text>}
-          <Text style={[styles.footerText, styles.designText]}>GPS Accuracy: 600 meters</Text>
+          <Animated.View style={[styles.footerContent, { transform: [{ translateY: footerPosition }] }]}>
+            <Text style={styles.markedLocationText}>
+              Current Location: {mLat !== null ? mLat.toFixed(4) : 28.6139}° N,{' '}
+              {mLong !== null ? mLong.toFixed(4) : 77.209}° E
+            </Text>
+            {selectedLocations.length > 0 && (
+              <>
+                <View style={styles.line} />
+                <Text style={styles.markedLocationText}>
+                  Marked Location: {selectedLocations[selectedLocations.length - 1].latitude.toFixed(4)}° N,{' '}
+                  {selectedLocations[selectedLocations.length - 1].longitude.toFixed(4)}° E
+                </Text>
+              </>
+            )}
+            <View style={styles.line} />
+            {DAC && <Text style={styles.markedLocationText}>Your DAC: {dacValue}</Text>}
+            <Text style={[styles.footerText, styles.designText]}>GPS Accuracy: 700 meters</Text>
+          </Animated.View>
         </View>
+        <TouchableOpacity style={styles.down} onPress={toggleFooter}>
+          <Icon name={footerVisible ? 'ios-arrow-down' : 'ios-arrow-up'} size={40} color="black" />
+        </TouchableOpacity>
       </View>
+    
 
 
       <Dialog.Container visible={showMapOptions}>
@@ -2050,13 +2214,48 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '120%',
   },
+  // footer: {
+  //   backgroundColor: '#9AC5F4',
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 20,
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   alignItems: 'center',
+  // },
   footer: {
-    backgroundColor: '#9AC5F4',
-    paddingVertical: 10,
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    justifyContent: 'center', // Center the icon vertically
+    alignItems: 'flex-end', // Align the icon to the right-hand side
+  },
+  footerContent: {
+    backgroundColor: '#fff',
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  down: {
+    position: 'absolute',
+    bottom: -30,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
   },
   locationContainer: {
     flex: 1,
@@ -2209,7 +2408,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
+  down:{
+    alignItems: 'center',
+  },
   buttonText1: {
     fontWeight: 'bold',
     color: 'white',
@@ -2407,4 +2608,12 @@ const styles = StyleSheet.create({
   },
 });
 
+
 export default MainScreen;
+
+
+
+
+//------------------------------------------------------------------------------  ----------------------------------------------------------------
+
+
