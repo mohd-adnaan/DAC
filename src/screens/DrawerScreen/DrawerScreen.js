@@ -211,7 +211,7 @@ const CustomDrawerContent = (props) => {
 
       {renderDrawerItem('person-outline', 'User', () => navigation.navigate('User'))}
       {renderDrawerItem('information-circle-outline', 'Support', handleSupportPress)}
-      {renderDrawerItem('help-circle-outline', 'About', () => navigation.navigate('Terms&Conditions'))}
+      {renderDrawerItem('help-circle-outline', 'About', () => navigation.navigate('About'))}
       {renderDrawerItem('document-outline', 'Terms & Conditions', () => navigation.navigate('Terms&Conditions'))}
       {renderDrawerItem('log-out-outline', 'Sign Out', () => navigation.navigate('SignOut'))}
     </DrawerContentScrollView>

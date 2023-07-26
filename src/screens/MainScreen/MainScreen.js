@@ -1348,6 +1348,8 @@ const MainScreen = () => {
   const [DAC,setDAC]= useState(false);
   const [footerPosition, setFooterPosition] = useState(new Animated.Value(0));
   const [footerVisible, setFooterVisible] = useState(true);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tip1,setTip1] = useState(true);
   useEffect(() => {
     requestCameraPermission();
     fetchDataAndDisplayOnMap();
@@ -1502,6 +1504,7 @@ const MainScreen = () => {
         ]);
         saveLocationToBackend(latitude, longitude);
         fetchDataAndDisplayOnMap();
+        setFooterVisible(prevState => !prevState);
       } else if (mapping && markers.length === 16) {
         Alert.alert(
           'Maximum Positions Reached',
@@ -1520,6 +1523,7 @@ const MainScreen = () => {
         setDAC(true);
         saveLocationToBackend(latitude, longitude);
         fetchDataAndDisplayOnMap();
+        setFooterVisible(prevState => !prevState);
       }
     }
   };
@@ -1635,8 +1639,8 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          latitude:86.487591 ,//,86.4851 //formattedLatitude,86.48406,
-          longitude: 25.319167// 25.3422,formattedLongitude,25.34389
+          longitude:formattedLongitude,// 25.3422 //25.319167,25.34389
+          latitude:formattedLatitude,//86.487591 //,86.48406,86.4851,
         })
       };
       const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
@@ -1715,20 +1719,22 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
     setSelectedLocations([]);
     setDrawPolygonCoordinates([]);
     setDAC(false);
-    region = {
-      latitude: 28.6139,
-      longitude: 77.209,
-      latitudeDelta: 20,
-      longitudeDelta: 30,
-    }
-    mapViewRef.current.animateToRegion(region, 2000);
+    // region = {
+    //   latitude: 28.6139,
+    //   longitude: 77.209,
+    //   latitudeDelta: 20,
+    //   longitudeDelta: 30,
+    // }
+    // mapViewRef.current.animateToRegion(region, 2000);
     setFooterVisible(prevState => !prevState);
+    setTip1(true)
   };
 
   const handleBuildingCV = () => {
     if (selectedLocations.length > 0) {
       selectedLocations.map((location, index) => {
         setShowDACPopup(true);
+        setFooterVisible(prevState => !prevState);
       });
     } else {
       Alert.alert(
@@ -1770,12 +1776,13 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
       setLayer('satellite');
       setDrawingEnabled(true);
       setShowDACPopup(false);
-
-      // Get the latitude and longitude of the last marked location
+      setTip1(false);
+      
+     // Get the latitude and longitude of the last marked location
       const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
       const { latitude, longitude } = lastMarkedLocation;
 
-      // Set the region to zoom into the marked location
+     // Set the region to zoom into the marked location
       const region = {
         latitude,
         longitude,
@@ -1836,6 +1843,15 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
   }, [footerVisible, windowHeight, footerPosition]);
 
   useEffect(() => {
+    if (selectedLocations.length > 0){
+      setShowTooltip(true);
+      setTimeout(() => {
+        setShowTooltip(false);
+      }, 3000); // Adjust the duration (in milliseconds) as per your preference
+    }
+  }, [selectedLocations]);
+
+  useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
@@ -1851,10 +1867,10 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
           ref={mapViewRef}
           style={{ ...styles.map, height: windowHeight }}
           region={{
-            latitude: 28.6139,
-            longitude: 77.209,
-            latitudeDelta: 20,
-            longitudeDelta: 30,
+            latitude:25.30933 ,// 28.6139,
+            longitude:86.49181,// 77.209,
+            latitudeDelta:0.005,// 20,
+            longitudeDelta:0.005, //30,
           }}
           provider={layer === 'satellite' ? PROVIDER_GOOGLE : undefined}
           mapType={layer === 'satellite' ? 'satellite' : 'none'}
@@ -2019,6 +2035,20 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
         onPress={handleMapOptionsPress}>
         <Icon name="layers" size={30} color="#333" />
       </TouchableOpacity>
+
+      {tip1 && showTooltip && (
+      <Animatable.View
+        style={styles.tooltipContainer}
+        animation="fadeIn"
+        duration={2500}
+        iterationCount={1}
+        onAnimationEnd={() => setShowTooltip(false)}
+      >
+        <Text style={styles.tooltipText}>Get Building Footprints<Icon name="ios-arrow-forward" size={30} color="white" />
+        </Text>
+      </Animatable.View>
+    )}
+
 
       <TouchableOpacity
         style={styles.getDACIcon}
@@ -2243,20 +2273,21 @@ const styles = StyleSheet.create({
   },
   down: {
     position: 'absolute',
-    bottom: -30,
-    right: 20,
+    bottom: 2,
+    right: 2,
     width: 60,
     height: 60,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Updated to use RGBA color for 50% opacity
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 3,
   },
+  
   locationContainer: {
     flex: 1,
   },
@@ -2408,9 +2439,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  down:{
-    alignItems: 'center',
-  },
+  // down:{
+  //   alignItems: 'center',
+  // },
   buttonText1: {
     fontWeight: 'bold',
     color: 'white',
@@ -2605,6 +2636,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  
+  // Tooltip styles
+  tooltipContainer: {
+    position: 'absolute',
+    top: 200, // Adjust the position of the tooltip as per your preference
+   // left: '50%',
+    right: 50,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: '#333',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tooltipText: {
+    flex:1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
