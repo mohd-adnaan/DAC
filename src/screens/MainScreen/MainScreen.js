@@ -78,7 +78,7 @@
 //   const [isDrawingEnabled, setDrawingEnabled] = useState(false);
 //   const [coordinates, setCoordinates] = useState([]);
 //   const [DAC,setDAC]= useState(false);
-  
+
 //   useEffect(() => {
 //     requestCameraPermission();
 //     fetchDataAndDisplayOnMap();
@@ -298,7 +298,7 @@
 //     try {
 //       const parsedGeom = JSON.parse(data.geom);
 
-  
+
 //       if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
 //         coordinates = parsedGeom.coordinates[0][0];
 //         getPolygon(coordinates);
@@ -316,7 +316,7 @@
 //     }
 //     console.log(coordinates)
 //     setMapPolygon(true);
-   
+
 //     const polygonCoordinates = coordinates.map((coordinatePair) => ({
 //       latitude: coordinatePair[1],
 //       longitude: coordinatePair[0], 
@@ -616,7 +616,7 @@
 //           color={PolygonMarker.color} 
 //         />
 //       ))}
-          
+
 //           { polygonCoordinates.length >= 3 &&
 //           <Polygon
 //               coordinates={polygonCoordinates}
@@ -626,7 +626,7 @@
 //               fillOpacity={0.35}
 //             />
 //           }
-      
+
 //           {drawpolygonCoordinates.length >= 3 && (
 //             <Polygon
 //               coordinates={drawpolygonCoordinates}
@@ -738,7 +738,7 @@
 //         </View>
 //       )}
 
-      
+
 //       <View style={styles.footer}>
 //         <View style={styles.locationContainer}>
 //           <Text style={styles.markedLocationText}>
@@ -1320,9 +1320,8 @@ const MainScreen = () => {
   const [showMapOptions, setShowMapOptions] = useState(false);
   const navigation = useNavigation();
   const [showAlert, setShowAlert] = useState(false);
-  const [layer, setLayer] = useState('osm');
-  const searchBarWidth = useRef(new Animated.Value(0)).current;
-  const searchBarHeight = useRef(new Animated.Value(0)).current;
+  const [layer, setLayer] = useState('satellite');
+  const [selectedMapOption, setSelectedMapOption] = useState('satellite');
   const windowHeight = Dimensions.get('window').height * 1.3;
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -1341,15 +1340,18 @@ const MainScreen = () => {
   const [shapeType, setShapeType] = useState('')
   const [markers, setMarkers] = useState([]);
   const [polygonCoordinates, setPolygonCoordinates] = useState([]);
-  const [PolygonMarkers,setPolygonMarkers] = useState([]);
+  const [PolygonMarkers, setPolygonMarkers] = useState([]);
   const [drawpolygonCoordinates, setDrawPolygonCoordinates] = useState([]);
   const [isDrawingEnabled, setDrawingEnabled] = useState(false);
   const [coordinates, setCoordinates] = useState([]);
-  const [DAC,setDAC]= useState(false);
+  const [DAC, setDAC] = useState(false);
   const [footerPosition, setFooterPosition] = useState(new Animated.Value(0));
   const [footerVisible, setFooterVisible] = useState(true);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [tip1,setTip1] = useState(true);
+  const [showTooltipJamalpur, setShowTooltipJamalpur] = useState(false);
+  const [tip1, setTip1] = useState(false);
+  const [DACdataInvalid, setDACdataInvalid] = useState(false);
+  const [markNewLocation , setMarkNewLocation] = useState(false);
   useEffect(() => {
     requestCameraPermission();
     fetchDataAndDisplayOnMap();
@@ -1417,7 +1419,7 @@ const MainScreen = () => {
         return;
       }
 
-      const filePath = `${RNFS.PicturesDirectoryPath}/screenshot.png`; // File path in the Pictures directory
+      const filePath = `${RNFS.PicturesDirectoryPath}/screenshot.png`; 
       await RNFS.copyFile(imageUri, filePath);
       console.log('Screenshot saved to:', filePath);
       Alert.alert('Screenshot saved to:', filePath);
@@ -1504,7 +1506,8 @@ const MainScreen = () => {
         ]);
         saveLocationToBackend(latitude, longitude);
         fetchDataAndDisplayOnMap();
-        setFooterVisible(prevState => !prevState);
+
+       // setFooterVisible(prevState => !prevState);
       } else if (mapping && markers.length === 16) {
         Alert.alert(
           'Maximum Positions Reached',
@@ -1523,7 +1526,9 @@ const MainScreen = () => {
         setDAC(true);
         saveLocationToBackend(latitude, longitude);
         fetchDataAndDisplayOnMap();
-        setFooterVisible(prevState => !prevState);
+        setPolygonMarkers([]);
+        setDACdataInvalid(false);
+        //setFooterVisible(prevState => !prevState);
       }
     }
   };
@@ -1542,26 +1547,31 @@ const MainScreen = () => {
 
       return data;
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.log('Error fetching data:', error);
       return null;
     }
   };
 
   const drawPolygon = () => {
+    if(DACdataInvalid){
     if (markers.length >= 3) {
       const coordinates = markers.map(marker => ({
         latitude: marker.latitude,
         longitude: marker.longitude,
       }));
       setDrawPolygonCoordinates(coordinates);
-    } else {
+    }
+   }
+    else {
       setDrawPolygonCoordinates([]);
     }
   };
 
   const displayDataOnMap = (data) => {
     if (!data || !data.dac || !data.geom) {
-      console.error('Invalid data received from backend');
+      console.log('Invalid data received from backend');
+      setDACdataInvalid(true);
+      console.log(DACdataInvalid);
       return;
     }
     setDacValue(data.dac);
@@ -1571,7 +1581,7 @@ const MainScreen = () => {
     try {
       const parsedGeom = JSON.parse(data.geom);
 
-  
+
       if (parsedGeom.type === 'MultiPolygon' && Array.isArray(parsedGeom.coordinates)) {
         coordinates = parsedGeom.coordinates[0][0];
         getPolygon(coordinates);
@@ -1589,24 +1599,24 @@ const MainScreen = () => {
     }
     console.log(coordinates)
     setMapPolygon(true);
-   
+
     const polygonCoordinates = coordinates.map((coordinatePair) => ({
       latitude: coordinatePair[1],
-      longitude: coordinatePair[0], 
+      longitude: coordinatePair[0],
     }));
     const markerColor = getRandomColor();
-const newMarkers = polygonCoordinates.map(({ latitude, longitude }) => ({
-  latitude,
-  longitude,
-  color: markerColor,
-}));
+    const newMarkers = polygonCoordinates.map(({ latitude, longitude }) => ({
+      latitude,
+      longitude,
+      color: markerColor,
+    }));
 
-setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
+    setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
 
     console.log('Polygon Coordinates:', polygonCoordinates);
-    console.log('Poly length',polygonCoordinates.length);
-    console.log('PolygonMarkers:',PolygonMarkers);
-    setCoordinates(polygonCoordinates); 
+    console.log('Poly length', polygonCoordinates.length);
+    console.log('PolygonMarkers:', PolygonMarkers);
+    setCoordinates(polygonCoordinates);
   };
 
 
@@ -1614,15 +1624,15 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
     if (coordinates.length >= 3) {
       const polygonCoordinate = coordinates.map(coordinate => ({
         latitude: coordinate[1],
-        longitude: coordinate[0], 
+        longitude: coordinate[0],
       }));
-      setPolygonCoordinates(polygonCoordinate);      
-    console.log('Polygon Coordinates:', polygonCoordinates);
-    console.log('Poly length',polygonCoordinates.length);
+      setPolygonCoordinates(polygonCoordinate);
+      console.log('Polygon Coordinates:', polygonCoordinates);
+      console.log('Poly length', polygonCoordinates.length);
     } else {
-      setPolygonCoordinates([]);      
-    console.log('Polygon Coordinates:', polygonCoordinates);
-    console.log('Poly length',polygonCoordinates.length);
+      setPolygonCoordinates([]);
+      console.log('Polygon Coordinates:', polygonCoordinates);
+      console.log('Poly length', polygonCoordinates.length);
     }
   };
 
@@ -1639,8 +1649,8 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          longitude:formattedLongitude,// 25.3422 //25.319167,25.34389
-          latitude:formattedLatitude,//86.487591 //,86.48406,86.4851,
+          latitude: formattedLongitude,//86.487591 //,86.48406,86.4851,
+          longitude: formattedLatitude,// 25.3422 //25.319167,25.34389,25.3075,86.4925,
         })
       };
       const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
@@ -1698,6 +1708,8 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
     closeModal();
     setMapping(true);
     setSelectedLocations([]);
+    setTip1(true);
+   // setFooterVisible(prevState => !prevState);
     // setFooterText('LongPress on map to update marked location');
     // setTimeout(() => {
     //   setFooterText('');
@@ -1707,18 +1719,33 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
       setMarkedLocation(null);
     }
   };
+  const gotoJamalpur = () => {
+    
+    // Set the region to zoom into the marked location
+    const region = {
+      latitude: 25.30933,
+      longitude:86.49181,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
 
+    // Update the map region
+    mapViewRef.current.animateToRegion(region, 3000); 
+  }
   const handleMapReset = () => {
     setMapping(false);
     setBoundaryMarkers([]);
     setDacValue(null);
     setMapPolygon(false);
     setMarkers([]);
+    setPolygonMarkers([]);
     setDrawingEnabled(false);
+    setDAC(false);
     setMarkedLocation(null);
     setSelectedLocations([]);
+    setPolygonCoordinates([]);
     setDrawPolygonCoordinates([]);
-    setDAC(false);
+    
     // region = {
     //   latitude: 28.6139,
     //   longitude: 77.209,
@@ -1726,8 +1753,8 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
     //   longitudeDelta: 30,
     // }
     // mapViewRef.current.animateToRegion(region, 2000);
-    setFooterVisible(prevState => !prevState);
-    setTip1(true)
+   // setFooterVisible(prevState => !prevState);
+    setTip1(false)
   };
 
   const handleBuildingCV = () => {
@@ -1777,12 +1804,12 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
       setDrawingEnabled(true);
       setShowDACPopup(false);
       setTip1(false);
-      
-     // Get the latitude and longitude of the last marked location
+
+      // Get the latitude and longitude of the last marked location
       const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
       const { latitude, longitude } = lastMarkedLocation;
 
-     // Set the region to zoom into the marked location
+      // Set the region to zoom into the marked location
       const region = {
         latitude,
         longitude,
@@ -1791,7 +1818,7 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
       };
 
       // Update the map region
-      mapViewRef.current.animateToRegion(region, 1000); // 1000ms duration for the animation
+      mapViewRef.current.animateToRegion(region, 3000); // 1000ms duration for the animation
     } else {
       Alert.alert(
         'No Marked Location',
@@ -1836,21 +1863,31 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
     // Animate the footer position whenever footerVisible changes
     Animated.timing(footerPosition, {
       toValue: footerVisible ? 0 : windowHeight - 60,
-      duration: 200, // Adjust the duration as needed
-      easing: Easing.ease, // Add an easing function for smoother animation (Optional)
+      duration: 200, 
+      easing: Easing.ease, 
       useNativeDriver: false,
     }).start();
   }, [footerVisible, windowHeight, footerPosition]);
 
+
   useEffect(() => {
-    if (selectedLocations.length > 0){
+    if (selectedLocations.length > 0) {
       setShowTooltip(true);
       setTimeout(() => {
         setShowTooltip(false);
-      }, 3000); // Adjust the duration (in milliseconds) as per your preference
+      }, 3000);
     }
   }, [selectedLocations]);
-
+  useEffect(() => {
+    setTimeout(() => {
+      setShowTooltipJamalpur(true);
+    }, 3000);
+  }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      setMarkNewLocation(true);
+    }, 3000);
+  }, []);
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => {
@@ -1863,16 +1900,18 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
 
     <View style={styles.container}>
       <View style={styles.mapContainer}>
+        
         <MapView
           ref={mapViewRef}
           style={{ ...styles.map, height: windowHeight }}
           region={{
-            latitude:25.30933 ,// 28.6139,
-            longitude:86.49181,// 77.209,
-            latitudeDelta:0.005,// 20,
-            longitudeDelta:0.005, //30,
+            latitude:  28.6139,
+            longitude:  77.209,
+            latitudeDelta: 30,
+            longitudeDelta:30,
           }}
           provider={layer === 'satellite' ? PROVIDER_GOOGLE : undefined}
+          
           mapType={layer === 'satellite' ? 'satellite' : 'none'}
           showsUserLocation={true}
           zoomEnabled={true}
@@ -1936,16 +1975,17 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
               pinColor={marker.color}
             />
           ))}
+
           {DAC && PolygonMarkers.map((PolygonMarker, index) => (
-        <Marker
-          key={index}
-          coordinate={{ latitude: PolygonMarker.latitude, longitude: PolygonMarker.longitude }}
-          color={PolygonMarker.color} 
-        />
-      ))}
-          
-          { polygonCoordinates.length >= 3 &&
-          <Polygon
+            <Marker
+              key={index}
+              coordinate={{ latitude: PolygonMarker.latitude, longitude: PolygonMarker.longitude }}
+              color={PolygonMarker.color}
+            />
+          ))}
+
+          {polygonCoordinates.length >= 3 &&
+            <Polygon
               coordinates={polygonCoordinates}
               strokeWidth={2}
               fillColor="rgba(0, 0, 255,0.5)"
@@ -1953,7 +1993,7 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
               fillOpacity={0.35}
             />
           }
-      
+
           {drawpolygonCoordinates.length >= 3 && (
             <Polygon
               coordinates={drawpolygonCoordinates}
@@ -1966,6 +2006,23 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
         </MapView>
 
       </View>
+{
+  markNewLocation && (
+    <Animatable.View
+          style={styles.tooltipContainerLocation}
+          animation="fadeIn"
+          duration={3000}
+          iterationCount={1}
+          onAnimationEnd={() => setMarkNewLocation(false)}
+        >
+          <Text style={styles.tooltipText}>
+            Mark New Location
+            <Icon name="ios-arrow-forward" size={30} color="white" />
+          </Text>
+        </Animatable.View>
+  )
+}
+      
 
       {loading && (
         <View style={styles.loadingContainer}>
@@ -1985,9 +2042,6 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
               <Icon name="ios-close-circle" color="gray" size={30} />
             </TouchableOpacity>
             <View style={styles.modalContent}>
-              {/* <TouchableOpacity style={styles.modalButton} onPress={handleMarkLocation}>
-                <Text style={styles.modalButtonText}>  Mark New Location  </Text>
-              </TouchableOpacity> */}
               <TouchableOpacity
                 style={styles.modalButton}
                 onPress={handleUpdateMarkedLocation}
@@ -2034,21 +2088,37 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
         style={styles.mapOptionsIcon}
         onPress={handleMapOptionsPress}>
         <Icon name="layers" size={30} color="#333" />
+
       </TouchableOpacity>
 
-      {tip1 && showTooltip && (
-      <Animatable.View
-        style={styles.tooltipContainer}
-        animation="fadeIn"
-        duration={2500}
-        iterationCount={1}
-        onAnimationEnd={() => setShowTooltip(false)}
-      >
-        <Text style={styles.tooltipText}>Get Building Footprints<Icon name="ios-arrow-forward" size={30} color="white" />
-        </Text>
-      </Animatable.View>
-    )}
+      
+      {tip1 && showTooltip && DACdataInvalid && (
+        <Animatable.View
+          style={styles.tooltipContainer}
+          animation="fadeIn"
+          duration={3000}
+          iterationCount={1}
+          onAnimationEnd={() => setShowTooltip(false)}
+        >
+          <Text style={styles.tooltipText}>Get Building Footprints<Icon name="ios-arrow-forward" size={30} color="white" />
+          </Text>
+        </Animatable.View>
+      )}
 
+      {DAC && showTooltipJamalpur && (
+        <Animatable.View
+          style={styles.tooltipContainerJamalpur}
+          animation="fadeIn"
+          duration={3000}
+          iterationCount={1}
+          onAnimationEnd={() => setShowTooltipJamalpur(false)}
+        >
+          <Text style={styles.tooltipText}>
+            Go to JamalPur
+            <Icon name="ios-arrow-forward" size={30} color="white" />
+          </Text>
+        </Animatable.View>
+      )}
 
       <TouchableOpacity
         style={styles.getDACIcon}
@@ -2056,6 +2126,12 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
         <Icon name="ios-analytics" size={30} color="#333" />
       </TouchableOpacity>
 
+
+      <TouchableOpacity
+        style={styles.gotoJamalpurIcon}
+        onPress={gotoJamalpur}>
+        <Icon name="ios-globe" size={30} color="#333" />
+      </TouchableOpacity>
 
       {showDACPopup && (
         <View style={styles.DACPopupContainer}>
@@ -2096,7 +2172,13 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
               </>
             )}
             <View style={styles.line} />
-            {DAC && <Text style={styles.markedLocationText}>Your DAC: {dacValue}</Text>}
+
+            {DAC && (
+              <Text style={styles.markedLocationText}>
+                {DACdataInvalid ? 'Your DAC: NULL' : `Your DAC: ${dacValue}`}
+              </Text>
+            )}
+
             <Text style={[styles.footerText, styles.designText]}>GPS Accuracy: 700 meters</Text>
           </Animated.View>
         </View>
@@ -2104,94 +2186,85 @@ setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
           <Icon name={footerVisible ? 'ios-arrow-down' : 'ios-arrow-up'} size={40} color="black" />
         </TouchableOpacity>
       </View>
-    
 
 
       <Dialog.Container visible={showMapOptions}>
         <Dialog.Title>Map Options</Dialog.Title>
         <Dialog.Description>Choose a map option:</Dialog.Description>
         <View style={styles.rowContainer}>
-          <Dialog.Button
-            label={
-              <>
-                <Image
-                  source={require('../../../assets/images/default.png')}
-                  style={styles.dialogImage}
-                />
-                <Text style={styles.buttonText}>OSM</Text>
-              </>
-            }
-            onPress={() => {
-              setLayer('bhuvan');
-              setShowMapOptions(false);
-            }}
-          />
-          <Dialog.Button
-            label={
-              <>
-                <Image
-                  source={require('../../../assets/images/osm.png')}
-                  style={styles.dialogImage}
-                />
-                <Text style={styles.buttonText}>Bhuvan</Text>
-              </>
-            }
+          <TouchableOpacity
+            style={[styles.mapOptionButton, selectedMapOption === 'osm' && styles.selectedMapOptionButton]}
             onPress={() => {
               setLayer('osm');
+              setSelectedMapOption('osm'); // Update the selected map option
               setShowMapOptions(false);
             }}
-          />
+          >
+            <Image
+              source={require('../../../assets/images/osm.png')}
+              style={styles.dialogImage}
+            />
+            <Text style={styles.buttonText}>OSM</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.mapOptionButton, selectedMapOption === 'bhuvan' && styles.selectedMapOptionButton]}
+            onPress={() => {
+              setLayer('bhuvan');
+              setSelectedMapOption('bhuvan'); // Update the selected map option
+              setShowMapOptions(false);
+            }}
+          >
+            <Image
+              source={require('../../../assets/images/default.png')}
+              style={styles.dialogImage}
+            />
+            <Text style={styles.buttonText}>Bhuvan</Text>
+          </TouchableOpacity>
         </View>
-        <Text style={styles.markedLocationText}>Satellite Maps</Text>
         <View style={styles.rowContainer}>
-          <Dialog.Button
-            label={
-              <>
-                <Image
-                  source={require('../../../assets/images/satellite.png')}
-                  style={styles.dialogImage}
-                />
-                <Text style={styles.buttonText}>Google</Text>
-              </>
-            }
+          <TouchableOpacity
+            style={[styles.mapOptionButton, selectedMapOption === 'satellite' && styles.selectedMapOptionButton]}
             onPress={() => {
               setLayer('satellite');
+              setSelectedMapOption('satellite'); // Update the selected map option
               setShowMapOptions(false);
             }}
-          />
-          <Dialog.Button
-            label={
-              <>
-                <Image
-                  source={require('../../../assets/images/esri_satellite.png')}
-                  style={styles.dialogImage}
-                />
-                <Text style={styles.buttonText}>Esri</Text>
-              </>
-            }
+          >
+            <Image
+              source={require('../../../assets/images/satellite.png')}
+              style={styles.dialogImage}
+            />
+            <Text style={styles.buttonText}>Google</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.mapOptionButton, selectedMapOption === 'esri' && styles.selectedMapOptionButton]}
             onPress={() => {
               setLayer('esri');
+              setSelectedMapOption('esri'); // Update the selected map option
               setShowMapOptions(false);
             }}
-          />
+          >
+            <Image
+              source={require('../../../assets/images/esri_satellite.png')}
+              style={styles.dialogImage}
+            />
+            <Text style={styles.buttonText}>Esri</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.rowContainer}>
-          <Dialog.Button
-            label={
-              <>
-                <Image
-                  source={require('../../../assets/images/mapbox.png')}
-                  style={styles.dialogImage}
-                />
-                <Text style={styles.buttonText}>Mapbox</Text>
-              </>
-            }
-            onPress={() => {
-              setLayer('mapbox');
-              setShowMapOptions(false);
-            }}
+        <TouchableOpacity
+          style={[styles.mapOptionButton, selectedMapOption === 'mapbox' && styles.selectedMapOptionButton]}
+          onPress={() => {
+            setLayer('mapbox');
+            setSelectedMapOption('mapbox'); // Update the selected map option
+            setShowMapOptions(false);
+          }}
+        >
+          <Image
+            source={require('../../../assets/images/mapbox.png')}
+            style={styles.dialogImage}
           />
-        </View>
+          <Text style={styles.buttonText}>Mapbox</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.closeIconContainer} onPress={closePreview}>
           <Icon name="close" size={40} color="black" />
         </TouchableOpacity>
@@ -2287,7 +2360,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 3,
   },
-  
+
   locationContainer: {
     flex: 1,
   },
@@ -2386,8 +2459,7 @@ const styles = StyleSheet.create({
 
   IconContainer2: {
     position: 'absolute',
-
-    top: 250,
+    top: 300,
     right: 12,
     marginLeft: 10,
     backgroundColor: '#fff',
@@ -2596,6 +2668,16 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 4,
   },
+  gotoJamalpurIcon:{
+    position: 'absolute',
+    top: 250,
+    right: 12,
+    marginLeft: 10,
+    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
+    padding: 4,
+    borderRadius: 4,
+  },
   DACPopupContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -2637,12 +2719,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  
+
   // Tooltip styles
   tooltipContainer: {
     position: 'absolute',
-    top: 200, // Adjust the position of the tooltip as per your preference
-   // left: '50%',
+    top: 200, 
+    // left: '50%',
     right: 50,
     paddingHorizontal: 15,
     paddingVertical: 8,
@@ -2651,13 +2733,49 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  tooltipContainerJamalpur: {
+    position: 'absolute',
+    top: 250, 
+    // left: '50%',
+    right: 50,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: '#333',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tooltipContainerLocation:{
+    position: 'absolute',
+    top: 60, 
+    // left: '50%',
+    right: 50,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: '#333',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   tooltipText: {
-    flex:1,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  mapOptionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderWidth: 3,
+    borderColor: 'transparent', 
+  },
+
+  selectedMapOptionButton: {
+    borderColor: '#007bff',
   },
 });
 
@@ -2667,6 +2785,6 @@ export default MainScreen;
 
 
 
-//------------------------------------------------------------------------------  ----------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------------
 
 
