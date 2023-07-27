@@ -10,11 +10,13 @@
 //   Image,
 //   Alert,
 //   TextInput,
-//   Animated,
 //   BackHandler,
 //   Modal,
 //   Button,
 //   ActivityIndicator,
+//   PanResponder,
+//   Animated,
+//   Easing,
 // } from 'react-native';
 // import MapView, {
 //   UrlTile,
@@ -52,9 +54,8 @@
 //   const [showMapOptions, setShowMapOptions] = useState(false);
 //   const navigation = useNavigation();
 //   const [showAlert, setShowAlert] = useState(false);
-//   const [layer, setLayer] = useState('osm');
-//   const searchBarWidth = useRef(new Animated.Value(0)).current;
-//   const searchBarHeight = useRef(new Animated.Value(0)).current;
+//   const [layer, setLayer] = useState('satellite');
+//   const [selectedMapOption, setSelectedMapOption] = useState('satellite');
 //   const windowHeight = Dimensions.get('window').height * 1.3;
 //   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
 //   const [showModal, setShowModal] = useState(false);
@@ -73,12 +74,18 @@
 //   const [shapeType, setShapeType] = useState('')
 //   const [markers, setMarkers] = useState([]);
 //   const [polygonCoordinates, setPolygonCoordinates] = useState([]);
-//   const [PolygonMarkers,setPolygonMarkers] = useState([]);
+//   const [PolygonMarkers, setPolygonMarkers] = useState([]);
 //   const [drawpolygonCoordinates, setDrawPolygonCoordinates] = useState([]);
 //   const [isDrawingEnabled, setDrawingEnabled] = useState(false);
 //   const [coordinates, setCoordinates] = useState([]);
-//   const [DAC,setDAC]= useState(false);
-
+//   const [DAC, setDAC] = useState(false);
+//   const [footerPosition, setFooterPosition] = useState(new Animated.Value(0));
+//   const [footerVisible, setFooterVisible] = useState(true);
+//   const [showTooltip, setShowTooltip] = useState(false);
+//   const [showTooltipJamalpur, setShowTooltipJamalpur] = useState(false);
+//   const [tip1, setTip1] = useState(false);
+//   const [DACdataInvalid, setDACdataInvalid] = useState(false);
+//   const [markNewLocation , setMarkNewLocation] = useState(false);
 //   useEffect(() => {
 //     requestCameraPermission();
 //     fetchDataAndDisplayOnMap();
@@ -146,7 +153,7 @@
 //         return;
 //       }
 
-//       const filePath = `${RNFS.PicturesDirectoryPath}/screenshot.png`; // File path in the Pictures directory
+//       const filePath = `${RNFS.PicturesDirectoryPath}/screenshot.png`; 
 //       await RNFS.copyFile(imageUri, filePath);
 //       console.log('Screenshot saved to:', filePath);
 //       Alert.alert('Screenshot saved to:', filePath);
@@ -158,7 +165,7 @@
 
 
 //   const getRandomColor = () => {
-//     const colors = ['#4285F4', '#34A853', '#FBBC05', '#EA4335',];
+//     const colors = ['#4285F4'];// '#34A853', '#FBBC05', '#EA4335',
 //     const randomIndex = Math.floor(Math.random() * colors.length);
 //     return colors[randomIndex];
 //   };
@@ -233,6 +240,8 @@
 //         ]);
 //         saveLocationToBackend(latitude, longitude);
 //         fetchDataAndDisplayOnMap();
+
+//        // setFooterVisible(prevState => !prevState);
 //       } else if (mapping && markers.length === 16) {
 //         Alert.alert(
 //           'Maximum Positions Reached',
@@ -251,6 +260,9 @@
 //         setDAC(true);
 //         saveLocationToBackend(latitude, longitude);
 //         fetchDataAndDisplayOnMap();
+//         setPolygonMarkers([]);
+//         setDACdataInvalid(false);
+//         //setFooterVisible(prevState => !prevState);
 //       }
 //     }
 //   };
@@ -269,26 +281,31 @@
 
 //       return data;
 //     } catch (error) {
-//       console.error('Error fetching data:', error);
+//       console.log('Error fetching data:', error);
 //       return null;
 //     }
 //   };
 
 //   const drawPolygon = () => {
+//     if(DACdataInvalid){
 //     if (markers.length >= 3) {
 //       const coordinates = markers.map(marker => ({
 //         latitude: marker.latitude,
 //         longitude: marker.longitude,
 //       }));
 //       setDrawPolygonCoordinates(coordinates);
-//     } else {
+//     }
+//    }
+//     else {
 //       setDrawPolygonCoordinates([]);
 //     }
 //   };
 
 //   const displayDataOnMap = (data) => {
 //     if (!data || !data.dac || !data.geom) {
-//       console.error('Invalid data received from backend');
+//       console.log('Invalid data received from backend');
+//       setDACdataInvalid(true);
+//       console.log(DACdataInvalid);
 //       return;
 //     }
 //     setDacValue(data.dac);
@@ -319,21 +336,21 @@
 
 //     const polygonCoordinates = coordinates.map((coordinatePair) => ({
 //       latitude: coordinatePair[1],
-//       longitude: coordinatePair[0], 
+//       longitude: coordinatePair[0],
 //     }));
 //     const markerColor = getRandomColor();
-// const newMarkers = polygonCoordinates.map(({ latitude, longitude }) => ({
-//   latitude,
-//   longitude,
-//   color: markerColor,
-// }));
+//     const newMarkers = polygonCoordinates.map(({ latitude, longitude }) => ({
+//       latitude,
+//       longitude,
+//       color: markerColor,
+//     }));
 
-// setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
+//     setPolygonMarkers(prevMarkers => [...prevMarkers, ...newMarkers]);
 
 //     console.log('Polygon Coordinates:', polygonCoordinates);
-//     console.log('Poly length',polygonCoordinates.length);
-//     console.log('PolygonMarkers:',PolygonMarkers);
-//     setCoordinates(polygonCoordinates); 
+//     console.log('Poly length', polygonCoordinates.length);
+//     console.log('PolygonMarkers:', PolygonMarkers);
+//     setCoordinates(polygonCoordinates);
 //   };
 
 
@@ -341,15 +358,15 @@
 //     if (coordinates.length >= 3) {
 //       const polygonCoordinate = coordinates.map(coordinate => ({
 //         latitude: coordinate[1],
-//         longitude: coordinate[0], 
+//         longitude: coordinate[0],
 //       }));
-//       setPolygonCoordinates(polygonCoordinate);      
-//     console.log('Polygon Coordinates:', polygonCoordinates);
-//     console.log('Poly length',polygonCoordinates.length);
+//       setPolygonCoordinates(polygonCoordinate);
+//       console.log('Polygon Coordinates:', polygonCoordinates);
+//       console.log('Poly length', polygonCoordinates.length);
 //     } else {
-//       setPolygonCoordinates([]);      
-//     console.log('Polygon Coordinates:', polygonCoordinates);
-//     console.log('Poly length',polygonCoordinates.length);
+//       setPolygonCoordinates([]);
+//       console.log('Polygon Coordinates:', polygonCoordinates);
+//       console.log('Poly length', polygonCoordinates.length);
 //     }
 //   };
 
@@ -366,8 +383,8 @@
 //           'Content-Type': 'application/json'
 //         },
 //         body: JSON.stringify({
-//           latitude:86.487591 ,//,86.4851 //formattedLatitude,86.48406,
-//           longitude: 25.319167// 25.3422,formattedLongitude,25.34389
+//           latitude: formattedLongitude,//86.487591 //,86.48406,86.4851,
+//           longitude: formattedLatitude,// 25.3422 //25.319167,25.34389,25.3075,86.4925,
 //         })
 //       };
 //       const response = await fetch('http://192.168.43.22/Integrate/save_location.php', requestOptions);
@@ -425,6 +442,8 @@
 //     closeModal();
 //     setMapping(true);
 //     setSelectedLocations([]);
+//     setTip1(true);
+//    // setFooterVisible(prevState => !prevState);
 //     // setFooterText('LongPress on map to update marked location');
 //     // setTimeout(() => {
 //     //   setFooterText('');
@@ -434,31 +453,49 @@
 //       setMarkedLocation(null);
 //     }
 //   };
+//   const gotoJamalpur = () => {
+    
+//     // Set the region to zoom into the marked location
+//     const region = {
+//       latitude: 25.30933,
+//       longitude:86.49181,
+//       latitudeDelta: 0.005,
+//       longitudeDelta: 0.005,
+//     };
 
+//     // Update the map region
+//     mapViewRef.current.animateToRegion(region, 3000); 
+//   }
 //   const handleMapReset = () => {
 //     setMapping(false);
 //     setBoundaryMarkers([]);
 //     setDacValue(null);
 //     setMapPolygon(false);
 //     setMarkers([]);
+//     setPolygonMarkers([]);
 //     setDrawingEnabled(false);
+//     setDAC(false);
 //     setMarkedLocation(null);
 //     setSelectedLocations([]);
+//     setPolygonCoordinates([]);
 //     setDrawPolygonCoordinates([]);
-//     setDAC(false);
-//     region = {
-//       latitude: 28.6139,
-//       longitude: 77.209,
-//       latitudeDelta: 20,
-//       longitudeDelta: 30,
-//     }
-//     mapViewRef.current.animateToRegion(region, 2000);
+    
+//     // region = {
+//     //   latitude: 28.6139,
+//     //   longitude: 77.209,
+//     //   latitudeDelta: 20,
+//     //   longitudeDelta: 30,
+//     // }
+//     // mapViewRef.current.animateToRegion(region, 2000);
+//    // setFooterVisible(prevState => !prevState);
+//     setTip1(false)
 //   };
 
 //   const handleBuildingCV = () => {
 //     if (selectedLocations.length > 0) {
 //       selectedLocations.map((location, index) => {
 //         setShowDACPopup(true);
+//        // setFooterVisible(prevState => !prevState);
 //       });
 //     } else {
 //       Alert.alert(
@@ -500,6 +537,7 @@
 //       setLayer('satellite');
 //       setDrawingEnabled(true);
 //       setShowDACPopup(false);
+//       setTip1(false);
 
 //       // Get the latitude and longitude of the last marked location
 //       const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
@@ -514,7 +552,7 @@
 //       };
 
 //       // Update the map region
-//       mapViewRef.current.animateToRegion(region, 1000); // 1000ms duration for the animation
+//       mapViewRef.current.animateToRegion(region, 3000); // 1000ms duration for the animation
 //     } else {
 //       Alert.alert(
 //         'No Marked Location',
@@ -522,8 +560,68 @@
 //       );
 //     }
 //   };
+//   const panResponder = useRef(
+//     PanResponder.create({
+//       onStartShouldSetPanResponder: () => true,
+//       onPanResponderMove: (_, gestureState) => {
+//         const { dy } = gestureState;
+//         if (dy > 0) {
+//           setFooterPosition(new Animated.Value(dy));
+//         }
+//       },
+//       onPanResponderRelease: (_, gestureState) => {
+//         const { dy } = gestureState;
+//         if (dy > 100) {
+//           // User dragged the footer down more than 100 units, close the footer
+//           Animated.timing(footerPosition, {
+//             toValue: 0,
+//             duration: 200,
+//             useNativeDriver: false,
+//           }).start();
+//         } else {
+//           // User didn't drag the footer down enough, snap back to the original position
+//           Animated.timing(footerPosition, {
+//             toValue: 0,
+//             duration: 200,
+//             useNativeDriver: false,
+//           }).start();
+//         }
+//       },
+//     })
+//   ).current;
+
+//   const toggleFooter = () => {
+//     setFooterVisible(prevState => !prevState);
+//   };
+//   useEffect(() => {
+//     // Animate the footer position whenever footerVisible changes
+//     Animated.timing(footerPosition, {
+//       toValue: footerVisible ? 0 : windowHeight - 60,
+//       duration: 200, 
+//       easing: Easing.ease, 
+//       useNativeDriver: false,
+//     }).start();
+//   }, [footerVisible, windowHeight, footerPosition]);
 
 
+//   useEffect(() => {
+//     if (selectedLocations.length > 0) {
+//       setShowTooltip(true);
+//       setTimeout(() => {
+//         setShowTooltip(false);
+//       }, 3000);
+//     }
+//   }, [selectedLocations]);
+//   useEffect(() => {
+//     setTimeout(() => {
+//       setShowTooltipJamalpur(true);
+//     }, 3000);
+//   }, []);
+//   useEffect(() => {
+//     setTimeout(() => {
+//       setMarkNewLocation(true);
+//     }, 3000);
+//   }, []);
 //   useEffect(() => {
 //     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
 //     return () => {
@@ -536,16 +634,19 @@
 
 //     <View style={styles.container}>
 //       <View style={styles.mapContainer}>
+        
 //         <MapView
 //           ref={mapViewRef}
 //           style={{ ...styles.map, height: windowHeight }}
+
 //           region={{
-//             latitude: 28.6139,
-//             longitude: 77.209,
+//             latitude:  10.3705,//28.6139,
+//             longitude: 83.8333,// 77.209,
 //             latitudeDelta: 20,
-//             longitudeDelta: 30,
+//             longitudeDelta:30,
 //           }}
 //           provider={layer === 'satellite' ? PROVIDER_GOOGLE : undefined}
+          
 //           mapType={layer === 'satellite' ? 'satellite' : 'none'}
 //           showsUserLocation={true}
 //           zoomEnabled={true}
@@ -609,23 +710,26 @@
 //               pinColor={marker.color}
 //             />
 //           ))}
-//           {DAC && PolygonMarkers.map((PolygonMarker, index) => (
-//         <Marker
-//           key={index}
-//           coordinate={{ latitude: PolygonMarker.latitude, longitude: PolygonMarker.longitude }}
-//           color={PolygonMarker.color} 
-//         />
-//       ))}
 
-//           { polygonCoordinates.length >= 3 &&
-//           <Polygon
+//           {DAC && PolygonMarkers.map((PolygonMarker, index) => (
+//             <Marker
+//               key={index}
+//               coordinate={{ latitude: PolygonMarker.latitude, longitude: PolygonMarker.longitude }}
+//               color={PolygonMarker.color}
+//             />
+            
+//           ))}
+//           {polygonCoordinates.length >= 3 &&
+//             <Polygon
 //               coordinates={polygonCoordinates}
 //               strokeWidth={2}
 //               fillColor="rgba(0, 0, 255,0.5)"
 //               zIndex={5}
 //               fillOpacity={0.35}
+
 //             />
 //           }
+         
 
 //           {drawpolygonCoordinates.length >= 3 && (
 //             <Polygon
@@ -639,6 +743,23 @@
 //         </MapView>
 
 //       </View>
+// {
+//   markNewLocation && (
+//     <Animatable.View
+//           style={styles.tooltipContainerLocation}
+//           animation="fadeIn"
+//           duration={3000}
+//           iterationCount={1}
+//           onAnimationEnd={() => setMarkNewLocation(false)}
+//         >
+//           <Text style={styles.tooltipText}>
+//             Mark New Location
+//             <Icon name="ios-arrow-forward" size={30} color="white" />
+//           </Text>
+//         </Animatable.View>
+//   )
+// }
+      
 
 //       {loading && (
 //         <View style={styles.loadingContainer}>
@@ -648,7 +769,7 @@
 //       )}
 
 //       <TouchableOpacity style={styles.optionIconContainer} onPress={handleOptionPress}>
-//         <Icon name="location" size={28} color="#333" />
+//         <Icon name="ios-pin" size={28} color="#333" />
 //       </TouchableOpacity>
 
 //       <Modal visible={showModal} transparent={true} onRequestClose={closeModal}>
@@ -658,9 +779,6 @@
 //               <Icon name="ios-close-circle" color="gray" size={30} />
 //             </TouchableOpacity>
 //             <View style={styles.modalContent}>
-//               {/* <TouchableOpacity style={styles.modalButton} onPress={handleMarkLocation}>
-//                 <Text style={styles.modalButtonText}>  Mark New Location  </Text>
-//               </TouchableOpacity> */}
 //               <TouchableOpacity
 //                 style={styles.modalButton}
 //                 onPress={handleUpdateMarkedLocation}
@@ -707,14 +825,50 @@
 //         style={styles.mapOptionsIcon}
 //         onPress={handleMapOptionsPress}>
 //         <Icon name="layers" size={30} color="#333" />
+
 //       </TouchableOpacity>
+
+      
+//       {tip1 && showTooltip && DACdataInvalid && (
+//         <Animatable.View
+//           style={styles.tooltipContainer}
+//           animation="fadeIn"
+//           duration={3000}
+//           iterationCount={1}
+//           onAnimationEnd={() => setShowTooltip(false)}
+//         >
+//           <Text style={styles.tooltipText}>Mark Building Footprints<Icon name="ios-arrow-forward" size={30} color="white" />
+//           </Text>
+//         </Animatable.View>
+//       )}
+
+//       {DAC && showTooltipJamalpur && (
+//         <Animatable.View
+//           style={styles.tooltipContainerJamalpur}
+//           animation="fadeIn"
+//           duration={3000}
+//           iterationCount={1}
+//           onAnimationEnd={() => setShowTooltipJamalpur(false)}
+//         >
+//           <Text style={styles.tooltipText}>
+//             Go to JamalPur
+//             <Icon name="ios-arrow-forward" size={30} color="white" />
+//           </Text>
+//         </Animatable.View>
+//       )}
 
 //       <TouchableOpacity
 //         style={styles.getDACIcon}
 //         onPress={handleBuildingCV}>
-//         <Icon name="ios-analytics" size={30} color="#333" />
+//         <Icon name="pencil-outline" size={30} color="#333" />
 //       </TouchableOpacity>
 
+
+//       <TouchableOpacity
+//         style={styles.gotoJamalpurIcon}
+//         onPress={gotoJamalpur}>
+//         <Icon name="ios-arrow-up" size={30} color="#333" />
+//       </TouchableOpacity>
 
 //       {showDACPopup && (
 //         <View style={styles.DACPopupContainer}>
@@ -738,26 +892,36 @@
 //         </View>
 //       )}
 
-
 //       <View style={styles.footer}>
 //         <View style={styles.locationContainer}>
-//           <Text style={styles.markedLocationText}>
-//             Current Location: {mLat !== null ? mLat.toFixed(4) : 28.6139}° N,{' '}
-//             {mLong !== null ? mLong.toFixed(4) : 77.209}° E
-//           </Text>
-//           {selectedLocations.length > 0 && (
-//             <>
-//               <View style={styles.line} />
+//           <Animated.View style={[styles.footerContent, { transform: [{ translateY: footerPosition }] }]}>
+//             <Text style={styles.markedLocationText}>
+//               Current Location: {mLat !== null ? mLat.toFixed(4) : 28.6139}° N,{' '}
+//               {mLong !== null ? mLong.toFixed(4) : 77.209}° E
+//             </Text>
+//             {selectedLocations.length > 0 && (
+//               <>
+//                 <View style={styles.line} />
+//                 <Text style={styles.markedLocationText}>
+//                   Marked Location: {selectedLocations[selectedLocations.length - 1].latitude.toFixed(4)}° N,{' '}
+//                   {selectedLocations[selectedLocations.length - 1].longitude.toFixed(4)}° E
+//                 </Text>
+//               </>
+//             )}
+//             <View style={styles.line} />
+
+//             {DAC && (
 //               <Text style={styles.markedLocationText}>
-//                 Marked Location: {selectedLocations[selectedLocations.length - 1].latitude.toFixed(4)}° N,{' '}
-//                 {selectedLocations[selectedLocations.length - 1].longitude.toFixed(4)}° E
+//                 {DACdataInvalid ? 'Your DAC: NULL' : `Your DAC: ${dacValue}`}
 //               </Text>
-//             </>
-//           )}
-//           <View style={styles.line} />
-//           {DAC && <Text style={styles.markedLocationText}>Your DAC: {dacValue}</Text>}
-//           <Text style={[styles.footerText, styles.designText]}>GPS Accuracy: 600 meters</Text>
+//             )}
+
+//             <Text style={[styles.footerText, styles.designText]}>GPS Accuracy: 700 meters</Text>
+//           </Animated.View>
 //         </View>
+//         <TouchableOpacity style={styles.down} onPress={toggleFooter}>
+//           <Icon name={footerVisible ? 'ios-arrow-down' : 'ios-arrow-up'} size={40} color="black" />
+//         </TouchableOpacity>
 //       </View>
 
 
@@ -765,87 +929,79 @@
 //         <Dialog.Title>Map Options</Dialog.Title>
 //         <Dialog.Description>Choose a map option:</Dialog.Description>
 //         <View style={styles.rowContainer}>
-//           <Dialog.Button
-//             label={
-//               <>
-//                 <Image
-//                   source={require('../../../assets/images/default.png')}
-//                   style={styles.dialogImage}
-//                 />
-//                 <Text style={styles.buttonText}>OSM</Text>
-//               </>
-//             }
-//             onPress={() => {
-//               setLayer('bhuvan');
-//               setShowMapOptions(false);
-//             }}
-//           />
-//           <Dialog.Button
-//             label={
-//               <>
-//                 <Image
-//                   source={require('../../../assets/images/osm.png')}
-//                   style={styles.dialogImage}
-//                 />
-//                 <Text style={styles.buttonText}>Bhuvan</Text>
-//               </>
-//             }
+//           <TouchableOpacity
+//             style={[styles.mapOptionButton, selectedMapOption === 'osm' && styles.selectedMapOptionButton]}
 //             onPress={() => {
 //               setLayer('osm');
+//               setSelectedMapOption('osm'); // Update the selected map option
 //               setShowMapOptions(false);
 //             }}
-//           />
+//           >
+//             <Image
+//               source={require('../../../assets/images/osm.png')}
+//               style={styles.dialogImage}
+//             />
+//             <Text style={styles.buttonText}>Bhuvan</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity
+//             style={[styles.mapOptionButton, selectedMapOption === 'bhuvan' && styles.selectedMapOptionButton]}
+//             onPress={() => {
+//               setLayer('bhuvan');
+//               setSelectedMapOption('bhuvan'); // Update the selected map option
+//               setShowMapOptions(false);
+//             }}
+//           >
+//             <Image
+//               source={require('../../../assets/images/default.png')}
+//               style={styles.dialogImage}
+//             />
+//             <Text style={styles.buttonText}>OSM</Text>
+//           </TouchableOpacity>
 //         </View>
-//         <Text style={styles.markedLocationText}>Satellite Maps</Text>
 //         <View style={styles.rowContainer}>
-//           <Dialog.Button
-//             label={
-//               <>
-//                 <Image
-//                   source={require('../../../assets/images/satellite.png')}
-//                   style={styles.dialogImage}
-//                 />
-//                 <Text style={styles.buttonText}>Google</Text>
-//               </>
-//             }
+//           <TouchableOpacity
+//             style={[styles.mapOptionButton, selectedMapOption === 'satellite' && styles.selectedMapOptionButton]}
 //             onPress={() => {
 //               setLayer('satellite');
+//               setSelectedMapOption('satellite'); // Update the selected map option
 //               setShowMapOptions(false);
 //             }}
-//           />
-//           <Dialog.Button
-//             label={
-//               <>
-//                 <Image
-//                   source={require('../../../assets/images/esri_satellite.png')}
-//                   style={styles.dialogImage}
-//                 />
-//                 <Text style={styles.buttonText}>Esri</Text>
-//               </>
-//             }
+//           >
+//             <Image
+//               source={require('../../../assets/images/satellite.png')}
+//               style={styles.dialogImage}
+//             />
+//             <Text style={styles.buttonText}>Google</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity
+//             style={[styles.mapOptionButton, selectedMapOption === 'esri' && styles.selectedMapOptionButton]}
 //             onPress={() => {
 //               setLayer('esri');
+//               setSelectedMapOption('esri'); // Update the selected map option
 //               setShowMapOptions(false);
 //             }}
-//           />
+//           >
+//             <Image
+//               source={require('../../../assets/images/esri_satellite.png')}
+//               style={styles.dialogImage}
+//             />
+//             <Text style={styles.buttonText}>Esri</Text>
+//           </TouchableOpacity>
 //         </View>
-//         <View style={styles.rowContainer}>
-//           <Dialog.Button
-//             label={
-//               <>
-//                 <Image
-//                   source={require('../../../assets/images/mapbox.png')}
-//                   style={styles.dialogImage}
-//                 />
-//                 <Text style={styles.buttonText}>Mapbox</Text>
-//               </>
-//             }
-//             onPress={() => {
-//               setLayer('mapbox');
-//               setShowMapOptions(false);
-//             }}
+//         <TouchableOpacity
+//           style={[styles.mapOptionButton, selectedMapOption === 'mapbox' && styles.selectedMapOptionButton]}
+//           onPress={() => {
+//             setLayer('mapbox');
+//             setSelectedMapOption('mapbox'); // Update the selected map option
+//             setShowMapOptions(false);
+//           }}
+//         >
+//           <Image
+//             source={require('../../../assets/images/mapbox.png')}
+//             style={styles.dialogImage}
 //           />
-//         </View>
+//           <Text style={styles.buttonText}>Mapbox</Text>
+//         </TouchableOpacity>
 //         <TouchableOpacity style={styles.closeIconContainer} onPress={closePreview}>
 //           <Icon name="close" size={40} color="black" />
 //         </TouchableOpacity>
@@ -898,14 +1054,50 @@
 //     width: '100%',
 //     height: '120%',
 //   },
+//   // footer: {
+//   //   backgroundColor: '#9AC5F4',
+//   //   paddingVertical: 10,
+//   //   paddingHorizontal: 20,
+//   //   flexDirection: 'row',
+//   //   justifyContent: 'space-between',
+//   //   alignItems: 'center',
+//   // },
 //   footer: {
-//     backgroundColor: '#9AC5F4',
-//     paddingVertical: 10,
-//     paddingHorizontal: 20,
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
+//     position: 'absolute',
+//     bottom: 0,
+//     width: '100%',
+//     justifyContent: 'center', // Center the icon vertically
+//     alignItems: 'flex-end', // Align the icon to the right-hand side
 //   },
+//   footerContent: {
+//     backgroundColor: '#fff',
+//     paddingHorizontal: 20,
+//     paddingVertical: 12,
+//     borderTopLeftRadius: 20,
+//     borderTopRightRadius: 20,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: -4 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 4,
+//     elevation: 4,
+//   },
+//   down: {
+//     position: 'absolute',
+//     bottom: 2,
+//     right: 2,
+//     width: 60,
+//     height: 60,
+//     borderRadius: 30,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     backgroundColor: 'rgba(255, 255, 255, 0.5)', // Updated to use RGBA color for 50% opacity
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 2,
+//     elevation: 3,
+//   },
+
 //   locationContainer: {
 //     flex: 1,
 //   },
@@ -1004,8 +1196,7 @@
 
 //   IconContainer2: {
 //     position: 'absolute',
-
-//     top: 250,
+//     top: 300,
 //     right: 12,
 //     marginLeft: 10,
 //     backgroundColor: '#fff',
@@ -1057,7 +1248,9 @@
 //     justifyContent: 'center',
 //     alignItems: 'center',
 //   },
-
+//   // down:{
+//   //   alignItems: 'center',
+//   // },
 //   buttonText1: {
 //     fontWeight: 'bold',
 //     color: 'white',
@@ -1212,6 +1405,16 @@
 //     padding: 4,
 //     borderRadius: 4,
 //   },
+//   gotoJamalpurIcon:{
+//     position: 'absolute',
+//     top: 250,
+//     right: 12,
+//     marginLeft: 10,
+//     backgroundColor: '#fff',
+//     backgroundColor: '#FFFFFF',
+//     padding: 4,
+//     borderRadius: 4,
+//   },
 //   DACPopupContainer: {
 //     flex: 1,
 //     justifyContent: 'center',
@@ -1254,14 +1457,76 @@
 //     textAlign: 'center',
 //   },
 
+//   // Tooltip styles
+//   tooltipContainer: {
+//     position: 'absolute',
+//     top: 200, 
+//     // left: '50%',
+//     right: 50,
+//     paddingHorizontal: 15,
+//     paddingVertical: 8,
+//     backgroundColor: '#333',
+//     borderRadius: 20,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   tooltipContainerJamalpur: {
+//     position: 'absolute',
+//     top: 250, 
+//     // left: '50%',
+//     right: 50,
+//     paddingHorizontal: 15,
+//     paddingVertical: 8,
+//     backgroundColor: '#333',
+//     borderRadius: 20,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   tooltipContainerLocation:{
+//     position: 'absolute',
+//     top: 110, 
+//     // left: '50%',
+//     right: 50,
+//     paddingHorizontal: 15,
+//     paddingVertical: 8,
+//     backgroundColor: '#333',
+//     borderRadius: 20,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+
+//   tooltipText: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     color: 'white',
+//     fontSize: 16,
+//     fontWeight: 'bold',
+//   },
+//   mapOptionButton: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     padding: 10,
+//     borderWidth: 3,
+//     borderColor: 'transparent', 
+//   },
+
+//   selectedMapOptionButton: {
+//     borderColor: '#007bff',
+//   },
 // });
+
 
 // export default MainScreen;
 
 
 
 
-// //------------------------------------------------------------------------------  ----------------------------------------------------------------
+// //----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -1359,9 +1624,7 @@ const MainScreen = () => {
   useEffect(() => {
     requestPermission();
   }, []);
-  useEffect(() => {
-    drawPolygon();
-  }, [markers]);
+ 
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -1431,7 +1694,7 @@ const MainScreen = () => {
 
 
   const getRandomColor = () => {
-    const colors = ['#4285F4', '#34A853', '#FBBC05', '#EA4335',];
+    const colors = ['#4285F4'];// '#34A853', '#FBBC05', '#EA4335',
     const randomIndex = Math.floor(Math.random() * colors.length);
     return colors[randomIndex];
   };
@@ -1761,7 +2024,7 @@ const MainScreen = () => {
     if (selectedLocations.length > 0) {
       selectedLocations.map((location, index) => {
         setShowDACPopup(true);
-        setFooterVisible(prevState => !prevState);
+       // setFooterVisible(prevState => !prevState);
       });
     } else {
       Alert.alert(
@@ -1804,21 +2067,23 @@ const MainScreen = () => {
       setDrawingEnabled(true);
       setShowDACPopup(false);
       setTip1(false);
+      setMarkedLocation(null);
+      setSelectedLocations([]);
 
-      // Get the latitude and longitude of the last marked location
-      const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
-      const { latitude, longitude } = lastMarkedLocation;
+      // // Get the latitude and longitude of the last marked location
+      // const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
+      // const { latitude, longitude } = lastMarkedLocation;
 
-      // Set the region to zoom into the marked location
-      const region = {
-        latitude,
-        longitude,
-        latitudeDelta: 0.001,
-        longitudeDelta: 0.001,
-      };
+      // // Set the region to zoom into the marked location
+      // const region = {
+      //   latitude,
+      //   longitude,
+      //   latitudeDelta: 0.001,
+      //   longitudeDelta: 0.001,
+      // };
 
-      // Update the map region
-      mapViewRef.current.animateToRegion(region, 3000); // 1000ms duration for the animation
+      // // Update the map region
+      // mapViewRef.current.animateToRegion(region, 3000); // 1000ms duration for the animation
     } else {
       Alert.alert(
         'No Marked Location',
@@ -1889,6 +2154,11 @@ const MainScreen = () => {
     }, 3000);
   }, []);
   useEffect(() => {
+    drawPolygon();
+  }, [markers]);
+
+
+  useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
@@ -1904,10 +2174,11 @@ const MainScreen = () => {
         <MapView
           ref={mapViewRef}
           style={{ ...styles.map, height: windowHeight }}
+
           region={{
-            latitude:  28.6139,
-            longitude:  77.209,
-            latitudeDelta: 30,
+            latitude:  10.3705,//28.6139,
+            longitude: 83.8333,// 77.209,
+            latitudeDelta: 20,
             longitudeDelta:30,
           }}
           provider={layer === 'satellite' ? PROVIDER_GOOGLE : undefined}
@@ -1976,13 +2247,14 @@ const MainScreen = () => {
             />
           ))}
 
-          {DAC && PolygonMarkers.map((PolygonMarker, index) => (
+          {/* {DAC && PolygonMarkers.map((PolygonMarker, index) => (
             <Marker
               key={index}
               coordinate={{ latitude: PolygonMarker.latitude, longitude: PolygonMarker.longitude }}
               color={PolygonMarker.color}
             />
-          ))}
+            
+          ))} */}
 
           {polygonCoordinates.length >= 3 &&
             <Polygon
@@ -1991,8 +2263,10 @@ const MainScreen = () => {
               fillColor="rgba(0, 0, 255,0.5)"
               zIndex={5}
               fillOpacity={0.35}
+
             />
           }
+         
 
           {drawpolygonCoordinates.length >= 3 && (
             <Polygon
@@ -2032,7 +2306,7 @@ const MainScreen = () => {
       )}
 
       <TouchableOpacity style={styles.optionIconContainer} onPress={handleOptionPress}>
-        <Icon name="location" size={28} color="#333" />
+        <Icon name="ios-pin" size={28} color="#333" />
       </TouchableOpacity>
 
       <Modal visible={showModal} transparent={true} onRequestClose={closeModal}>
@@ -2100,12 +2374,12 @@ const MainScreen = () => {
           iterationCount={1}
           onAnimationEnd={() => setShowTooltip(false)}
         >
-          <Text style={styles.tooltipText}>Get Building Footprints<Icon name="ios-arrow-forward" size={30} color="white" />
+          <Text style={styles.tooltipText}>Mark Building Footprints<Icon name="ios-arrow-forward" size={30} color="white" />
           </Text>
         </Animatable.View>
       )}
 
-      {DAC && showTooltipJamalpur && (
+      {showTooltipJamalpur && (
         <Animatable.View
           style={styles.tooltipContainerJamalpur}
           animation="fadeIn"
@@ -2123,14 +2397,14 @@ const MainScreen = () => {
       <TouchableOpacity
         style={styles.getDACIcon}
         onPress={handleBuildingCV}>
-        <Icon name="ios-analytics" size={30} color="#333" />
+        <Icon name="ios-pencil" size={30} color="#333" />
       </TouchableOpacity>
 
 
       <TouchableOpacity
         style={styles.gotoJamalpurIcon}
         onPress={gotoJamalpur}>
-        <Icon name="ios-globe" size={30} color="#333" />
+        <Icon name="ios-navigate" size={30} color="#333" />
       </TouchableOpacity>
 
       {showDACPopup && (
@@ -2204,7 +2478,7 @@ const MainScreen = () => {
               source={require('../../../assets/images/osm.png')}
               style={styles.dialogImage}
             />
-            <Text style={styles.buttonText}>OSM</Text>
+            <Text style={styles.buttonText}>Bhuvan</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.mapOptionButton, selectedMapOption === 'bhuvan' && styles.selectedMapOptionButton]}
@@ -2218,7 +2492,7 @@ const MainScreen = () => {
               source={require('../../../assets/images/default.png')}
               style={styles.dialogImage}
             />
-            <Text style={styles.buttonText}>Bhuvan</Text>
+            <Text style={styles.buttonText}>OSM</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.rowContainer}>
@@ -2747,7 +3021,7 @@ const styles = StyleSheet.create({
   },
   tooltipContainerLocation:{
     position: 'absolute',
-    top: 60, 
+    top: 110, 
     // left: '50%',
     right: 50,
     paddingHorizontal: 15,
@@ -2786,5 +3060,6 @@ export default MainScreen;
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------
+
 
 

@@ -185,6 +185,22 @@ const styles = StyleSheet.create({
     color: '#333',
     marginLeft: 16,
   },
+  footer: {
+    alignItems: 'center',
+    paddingVertical: 150,
+    //backgroundColor: '#F4F8FD',
+    borderTopWidth: 1,
+    borderTopColor: 'white',//'#D3DCE6',
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#888',
+  },
+  footerImage: {
+    width: 50,
+    height: 50,
+    marginBottom: 5,
+  },
 });
 
 const CustomDrawerContent = (props) => {
@@ -196,6 +212,7 @@ const CustomDrawerContent = (props) => {
 
   const renderDrawerItem = (iconName, text, onPress) => {
     return (
+      
       <TouchableOpacity onPress={onPress} style={styles.drawerItemContainer}>
         <Icon name={iconName} size={28} color="#333" />
         <Text style={styles.drawerItemText}>{text}</Text>
@@ -214,6 +231,16 @@ const CustomDrawerContent = (props) => {
       {renderDrawerItem('help-circle-outline', 'About', () => navigation.navigate('About'))}
       {renderDrawerItem('document-outline', 'Terms & Conditions', () => navigation.navigate('Terms&Conditions'))}
       {renderDrawerItem('log-out-outline', 'Sign Out', () => navigation.navigate('SignOut'))}
+
+
+      <View style={styles.footer}>
+        <Image
+          source={require('../../../assets/images/nrsclogo.png')}
+          style={styles.footerImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.footerText}>Design and Developed by NRSC, ISRO</Text>
+      </View>
     </DrawerContentScrollView>
   );
 };
@@ -240,7 +267,10 @@ const DrawerScreen = () => {
       <Drawer.Screen name="Terms&Conditions" component={Terms_PrivacyScreen} options={{ headerShown: false }} />
       <Drawer.Screen name="SignOut" component={SignOutScreen} options={{ headerShown: false }} />
     </Drawer.Navigator>
+
+    
   );
 };
 
 export default DrawerScreen;
+
