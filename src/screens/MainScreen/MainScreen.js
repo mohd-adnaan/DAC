@@ -1617,6 +1617,8 @@ const MainScreen = () => {
   const [tip1, setTip1] = useState(false);
   const [DACdataInvalid, setDACdataInvalid] = useState(false);
   const [markNewLocation , setMarkNewLocation] = useState(false);
+  const [SaveAndSend, setSaveAndSend] = useState(false);
+
   useEffect(() => {
     requestCameraPermission();
     fetchDataAndDisplayOnMap();
@@ -1767,7 +1769,8 @@ const MainScreen = () => {
           ...prevMarkers,
           { latitude, longitude, color: markerColor },
         ]);
-        saveLocationToBackend(latitude, longitude);
+        saveAndSendToServer(latitude, longitude);
+  
         fetchDataAndDisplayOnMap();
 
        // setFooterVisible(prevState => !prevState);
@@ -1800,6 +1803,7 @@ const MainScreen = () => {
     const data = await fetchDataFromBackend();
     displayDataOnMap(data);
   };
+
 
   const fetchDataFromBackend = async () => {
     try {
@@ -1899,6 +1903,30 @@ const MainScreen = () => {
     }
   };
 
+  const saveAndSendToServer = async (latitude, longitude) => {
+    const formattedLatitude = latitude.toFixed(4);
+    const formattedLongitude = longitude.toFixed(4);
+    console.log(formattedLatitude, formattedLongitude);
+    try {
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          latitude: formattedLongitude,//86.487591 //,86.48406,86.4851,
+          longitude: formattedLatitude,// 25.3422 //25.319167,25.34389,25.3075,86.4925,
+        })
+      };
+      const response = await fetch('http://192.168.43.22/Integrate/SaveAndSendPolygon.php', requestOptions);
+      const responseData = await response.json();
+      console.log('Location data saved:', responseData);
+    } catch (error) {
+      console.error('Error: Not Passed', error);
+    }
+  } 
+
   const saveLocationToBackend = async (latitude, longitude) => {
     const formattedLatitude = latitude.toFixed(4);
     const formattedLongitude = longitude.toFixed(4);
@@ -1920,7 +1948,7 @@ const MainScreen = () => {
       const responseData = await response.json();
       console.log('Location data saved:', responseData);
     } catch (error) {
-      console.error('Error: Not Passed', error);
+      console.log('Error: Not Passed', error);
     }
   };
 
@@ -2008,7 +2036,7 @@ const MainScreen = () => {
     setSelectedLocations([]);
     setPolygonCoordinates([]);
     setDrawPolygonCoordinates([]);
-    
+    setSaveAndSend(false);
     // region = {
     //   latitude: 28.6139,
     //   longitude: 77.209,
@@ -2018,6 +2046,7 @@ const MainScreen = () => {
     // mapViewRef.current.animateToRegion(region, 2000);
    // setFooterVisible(prevState => !prevState);
     setTip1(false)
+    
   };
 
   const handleBuildingCV = () => {
@@ -2069,7 +2098,8 @@ const MainScreen = () => {
       setTip1(false);
       setMarkedLocation(null);
       setSelectedLocations([]);
-
+      setPolygonCoordinates([]);
+      setSaveAndSend(true);
       // // Get the latitude and longitude of the last marked location
       // const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
       // const { latitude, longitude } = lastMarkedLocation;
@@ -2297,7 +2327,6 @@ const MainScreen = () => {
   )
 }
       
-
       {loading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007bff" />
@@ -2400,12 +2429,21 @@ const MainScreen = () => {
         <Icon name="ios-pencil" size={30} color="#333" />
       </TouchableOpacity>
 
+        {SaveAndSend && (
+          <TouchableOpacity
+        style={styles.saveIcon}
+        onPress={saveAndSendToServer}>
+       <Text style={styles.saveText}><Icon name="download" size={30} color="black" />Save and Send to Server</Text>
+      </TouchableOpacity>
+        )}
 
       <TouchableOpacity
         style={styles.gotoJamalpurIcon}
         onPress={gotoJamalpur}>
         <Icon name="ios-navigate" size={30} color="#333" />
       </TouchableOpacity>
+
+        
 
       {showDACPopup && (
         <View style={styles.DACPopupContainer}>
@@ -2825,6 +2863,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#82CD47',
     borderRadius: 8,
   },
+  saveIcon: {
+    marginHorizontal: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#82CD47',
+    borderRadius: 10, // Increased border radius for a more rounded appearance
+    shadowColor: 'rgba(0, 0, 0, 0.1)', 
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  saveText: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: 'white',
+    fontSize: 18, 
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)', 
+    textShadowOffset: {
+      width: 1,
+      height: 1,
+    },
+    textShadowRadius: 2,
+  },
   buttonText3: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -3051,6 +3117,7 @@ const styles = StyleSheet.create({
   selectedMapOptionButton: {
     borderColor: '#007bff',
   },
+ 
 });
 
 
