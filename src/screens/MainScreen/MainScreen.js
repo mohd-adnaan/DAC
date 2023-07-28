@@ -1694,7 +1694,6 @@ const MainScreen = () => {
   };
 
 
-
   const getRandomColor = () => {
     const colors = ['#4285F4'];// '#34A853', '#FBBC05', '#EA4335',
     const randomIndex = Math.floor(Math.random() * colors.length);
@@ -1769,10 +1768,8 @@ const MainScreen = () => {
           ...prevMarkers,
           { latitude, longitude, color: markerColor },
         ]);
-        saveAndSendToServer(latitude, longitude);
-  
+        saveLocationToBackend(latitude, longitude);
         fetchDataAndDisplayOnMap();
-
        // setFooterVisible(prevState => !prevState);
       } else if (mapping && markers.length === 16) {
         Alert.alert(
@@ -1922,10 +1919,25 @@ const MainScreen = () => {
       const response = await fetch('http://192.168.43.22/Integrate/SaveAndSendPolygon.php', requestOptions);
       const responseData = await response.json();
       console.log('Location data saved:', responseData);
+      
     } catch (error) {
       console.error('Error: Not Passed', error);
     }
   } 
+
+  const saveAndSendtoServerBtn = () => {
+    setPolygonCoordinates([]);
+    setPolygonMarkers([]);
+    setDrawingEnabled(false);
+    setDAC(false);
+    setMarkedLocation(null);
+    setSelectedLocations([]);
+    setPolygonCoordinates([]);
+    setDrawPolygonCoordinates([]);
+    setSaveAndSend(false);
+
+    Alert.alert("Polygon Saved successfully");
+  }
 
   const saveLocationToBackend = async (latitude, longitude) => {
     const formattedLatitude = latitude.toFixed(4);
@@ -2100,20 +2112,6 @@ const MainScreen = () => {
       setSelectedLocations([]);
       setPolygonCoordinates([]);
       setSaveAndSend(true);
-      // // Get the latitude and longitude of the last marked location
-      // const lastMarkedLocation = selectedLocations[selectedLocations.length - 1];
-      // const { latitude, longitude } = lastMarkedLocation;
-
-      // // Set the region to zoom into the marked location
-      // const region = {
-      //   latitude,
-      //   longitude,
-      //   latitudeDelta: 0.001,
-      //   longitudeDelta: 0.001,
-      // };
-
-      // // Update the map region
-      // mapViewRef.current.animateToRegion(region, 3000); // 1000ms duration for the animation
     } else {
       Alert.alert(
         'No Marked Location',
@@ -2432,7 +2430,7 @@ const MainScreen = () => {
         {SaveAndSend && (
           <TouchableOpacity
         style={styles.saveIcon}
-        onPress={saveAndSendToServer}>
+        onPress={saveAndSendtoServerBtn}>
        <Text style={styles.saveText}><Icon name="download" size={30} color="black" />Save and Send to Server</Text>
       </TouchableOpacity>
         )}
